@@ -1,0 +1,83 @@
+.aider*
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+env/
+venv/
+ENV/
+.venv
+
+# Jupyter
+.ipynb_checkpoints
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Training artifacts
+train_results/
+*.pth
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+
+# Logs
+logs/
+*.log
+nohup.out
+
+# Databases
+databases/
+*.db
+*.sqlite
+
+# Data
+data/
+SentimentData/
+
+# Plots
+plots_and_metrics/
+*.png
+*.jpg
+*.jpeg
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Automation runtime state
+deployments/*.json
+deployments/*.pid
+
+# Paper trading data
+paper_trades/
+
+# Personal files
+resume.*
+Auto_job_applier_linkedIn/
+job_*.py
+JOB_*.md
+
+# Keep templates
+!.env.template
+!requirements.txt
