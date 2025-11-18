@@ -1,0 +1,50 @@
+[
+  {
+    "rationale": "Exploiting the high correlation between lr_schedule_factor and performance, while slightly adjusting other parameters near their top performer values.",
+    "adam_beta1": 0.9,
+    "use_lr_schedule": 0.85,
+    "gamma": 0.995,
+    "lr_schedule_factor": 0.78,
+    "net_dimension": 1280,
+    "min_cash_reserve": 0.06,
+    "norm_action": 23000,
+    "max_grad_norm": 1.45,
+    "ppo_epochs": 9,
+    "thread_num": 11,
+    "value_loss_coef": 0.65,
+    "train_batch_size": 64,
+    "adam_beta2": 0.999
+  },
+  {
+    "rationale": "Exploiting the positive correlation between use_lr_schedule and performance, while slightly varying other parameters in their top performer ranges.",
+    "use_lr_schedule": 0.87,
+    "adam_epsilon": 1e-06,
+    "train_batch_size": 512,
+    "max_grad_norm": 1.43,
+    "lr_schedule_factor": 0.8,
+    "gamma": 0.99,
+    "net_dimension": 1290,
+    "min_cash_reserve": 0.07,
+    "norm_action": 23500,
+    "ppo_epochs": 8,
+    "thread_num": 12,
+    "value_loss_coef": 0.64,
+    "adam_beta1": 0.9
+  },
+  {
+    "rationale": "Exploring a new region by varying parameters that have moderate correlation with performance, while keeping some near their top performer values.",
+    "use_lr_schedule": 0.75,
+    "adam_epsilon": 1e-08,
+    "train_batch_size": 256,
+    "max_grad_norm": 1.5,
+    "lr_schedule_factor": 0.9,
+    "gamma": 0.98,
+    "net_dimension": 1300,
+    "min_cash_reserve": 0.065,
+    "norm_action": 22500,
+    "ppo_epochs": 7,
+    "thread_num": 10,
+    "value_loss_coef": 0.62,
+    "adam_beta1": 0.95
+  }
+]

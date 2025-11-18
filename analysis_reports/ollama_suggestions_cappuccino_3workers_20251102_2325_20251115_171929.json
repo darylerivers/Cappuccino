@@ -1,0 +1,23 @@
+[
+  {
+    "rationale": "Explores near the best range of gamma and lr, with slightly adjusted batch size and ppo_epochs.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.98,
+    "ppo_epochs": 12
+  },
+  {
+    "rationale": "Explores a new range of lr and ppo_epochs, with slightly adjusted batch size and gamma.",
+    "learning_rate": 5e-05,
+    "batch_size": 256,
+    "gamma": 0.97,
+    "ppo_epochs": 10
+  },
+  {
+    "rationale": "Explores near the best range of net_dimension and lr, with slightly adjusted batch size and ppo_epochs.",
+    "learning_rate": 8e-05,
+    "batch_size": 1024,
+    "gamma": 0.995,
+    "ppo_epochs": 6
+  }
+]

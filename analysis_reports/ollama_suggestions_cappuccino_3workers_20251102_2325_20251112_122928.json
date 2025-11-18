@@ -1,0 +1,31 @@
+[
+  {
+    "rationale": "Near the top performer's learning rate with increased batch size and exploration of gamma values",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.98,
+    "net_dimension": 1400,
+    "ppo_epochs": 9,
+    "time_decay_floor": 0.2
+  },
+  {
+    "rationale": "High exploration of lr_schedule_factor with top performer's other parameters",
+    "learning_rate": 5e-05,
+    "batch_size": 1024,
+    "gamma": 0.97,
+    "lr_schedule_factor": 0.9,
+    "use_lr_schedule": 1,
+    "max_drawdown_penalty": 0.1,
+    "value_loss_coef": 0.6
+  },
+  {
+    "rationale": "Exploiting the optimal range for norm_cash_exp and exploring new values for lr_schedule_type",
+    "learning_rate": 2e-05,
+    "batch_size": 256,
+    "gamma": 0.995,
+    "norm_cash_exp": -11.0,
+    "lr_schedule_type": 1,
+    "time_decay_floor": 0.15,
+    "min_cash_reserve": 0.07
+  }
+]

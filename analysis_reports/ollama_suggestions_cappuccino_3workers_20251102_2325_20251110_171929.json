@@ -1,0 +1,44 @@
+[
+  {
+    "rationale": "Explores a higher learning rate and slightly increased batch size, which might help in faster convergence and better exploitation of the solution space.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1408,
+    "norm_action": 20000,
+    "norm_cash_exp": -13,
+    "norm_reward_exp": -11,
+    "norm_stocks_exp": -6.5,
+    "norm_tech_exp": -17,
+    "ppo_epochs": 8,
+    "thread_num": 12
+  },
+  {
+    "rationale": "Tries a smaller learning rate and slightly reduced batch size, which might help in more stable convergence and better exploration of the solution space.",
+    "learning_rate": 5e-05,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "net_dimension": 1280,
+    "norm_action": 15000,
+    "norm_cash_exp": -12,
+    "norm_reward_exp": -10,
+    "norm_stocks_exp": -7.5,
+    "norm_tech_exp": -16,
+    "ppo_epochs": 7,
+    "thread_num": 14
+  },
+  {
+    "rationale": "Combines a higher learning rate with a larger batch size and slightly increased exploration parameters, which might help in both faster convergence and more thorough exploration.",
+    "learning_rate": 0.0002,
+    "batch_size": 768,
+    "gamma": 0.995,
+    "net_dimension": 1536,
+    "norm_action": 23000,
+    "norm_cash_exp": -14,
+    "norm_reward_exp": -12,
+    "norm_stocks_exp": -7,
+    "norm_tech_exp": -18,
+    "ppo_epochs": 9,
+    "thread_num": 10
+  }
+]

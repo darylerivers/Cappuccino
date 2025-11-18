@@ -1,0 +1,26 @@
+[
+  {
+    "rationale": "Explores near the best lr and gamma found in top performers while balancing exploration.",
+    "learning_rate": 0.001,
+    "batch_size": 256,
+    "gamma": 0.995,
+    "net_dimension": 1400,
+    "ppo_epochs": 8
+  },
+  {
+    "rationale": "Tries a higher lr and slightly smaller batch size to see if it can find a better balance.",
+    "learning_rate": 0.0002,
+    "batch_size": 128,
+    "gamma": 0.99,
+    "net_dimension": 1350,
+    "ppo_epochs": 6
+  },
+  {
+    "rationale": "Explores near the best net dimension and lr found in top performers while balancing exploration.",
+    "learning_rate": 0.0005,
+    "batch_size": 512,
+    "gamma": 0.98,
+    "net_dimension": 1600,
+    "ppo_epochs": 10
+  }
+]

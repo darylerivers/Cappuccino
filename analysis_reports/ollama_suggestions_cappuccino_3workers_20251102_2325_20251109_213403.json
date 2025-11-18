@@ -1,0 +1,25 @@
+[
+  {
+    "rationale": "Explores a smaller learning rate and slightly increased batch size, which might help with convergence.",
+    "learning_rate": 5e-05,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "net_dimension": 1536,
+    "ppo_epochs": 8
+  },
+  {
+    "rationale": "Explores a higher value loss coefficient and slightly increased number of workers, which might help with exploration.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "value_loss_coef": 0.75,
+    "worker_num": 14
+  },
+  {
+    "rationale": "Explores a smaller batch size and slightly increased time decay floor, which might help with stabilizing training.",
+    "learning_rate": 0.0001,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "time_decay_floor": 0.17
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "rationale": "Explores near the optimal learning rate and gamma, which have high correlation with performance.",
+    "learning_rate": 0.0001,
+    "gamma": 0.99,
+    "net_dimension": 1281.0398,
+    "max_drawdown_penalty": 0.0652,
+    "use_lr_schedule": 1.0,
+    "norm_cash_exp": -10.6604
+  },
+  {
+    "rationale": "Explores a different range of net_dimension, which has a moderate correlation with performance.",
+    "net_dimension": 1920.0,
+    "max_drawdown_penalty": 0.0335,
+    "use_lr_schedule": 1.0,
+    "norm_cash_exp": -15.0569
+  },
+  {
+    "rationale": "Tries a smaller batch size and a different gamma value, which have moderate correlation with performance.",
+    "batch_size": 256,
+    "gamma": 0.98,
+    "net_dimension": 1298.0105,
+    "max_drawdown_penalty": 0.0673,
+    "use_lr_schedule": 1.0,
+    "norm_cash_exp": -11.4064
+  }
+]

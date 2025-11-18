@@ -1,0 +1,29 @@
+[
+  {
+    "rationale": "This configuration balances exploitation near the top performers and exploration into new regions by adjusting parameters with high correlation to performance.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1280,
+    "norm_action": 20000,
+    "ppo_epochs": 10
+  },
+  {
+    "rationale": "This config focuses on high correlation parameters and explores a wider range for some variables to potentially find better regions.",
+    "learning_rate": 0.0005,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "net_dimension": 1792,
+    "norm_action": 24000,
+    "ppo_epochs": 12
+  },
+  {
+    "rationale": "This configuration is a balanced exploration-exploitation strategy, using parameters that showed strong correlation and adjusting them slightly to discover new regions.",
+    "learning_rate": 0.0003,
+    "batch_size": 1024,
+    "gamma": 0.97,
+    "net_dimension": 1536,
+    "norm_action": 23000,
+    "ppo_epochs": 8
+  }
+]

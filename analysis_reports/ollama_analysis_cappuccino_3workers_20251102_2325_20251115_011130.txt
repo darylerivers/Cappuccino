@@ -1,0 +1,45 @@
+================================================================================
+OLLAMA TRAINING ANALYSIS REPORT
+Study: cappuccino_3workers_20251102_2325
+Model: qwen2.5-coder:7b
+Date: 2025-11-15 01:11:30.908981
+================================================================================
+
+### 1. KEY INSIGHTS
+
+- **base_break_step**: Top performers have a slightly lower `base_break_step` compared to bottom performers, which suggests that a more frequent breaking step might lead to better performance.
+- **norm_action**: A higher normalized action value seems to correlate with better performance, indicating that agents performing better might be taking larger or more impactful actions.
+- **net_dimension**: Bottom performers have a slightly higher `net_dimension`, potentially due to the complexity of the network leading to less stable learning.
+- **base_target_step**: The slight difference in `base_target_step` suggests it has a minor impact on performance.
+- **eval_time_gap**: Top performers evaluate their models more frequently, which might help in stabilizing the training process and catching better performing states faster.
+- **norm_cash_exp** and **norm_reward_exp**: A higher negative normalized cash and reward experience indicates that agents are handling financial outcomes worse, possibly due to poor risk management or inefficient strategies.
+- **thread_num** and **batch_size**: These parameters seem to have minimal impact on performance.
+
+### 2. POTENTIAL ISSUES
+
+- **Worst Values**: The presence of negative values in the worst trials suggests that the agent is sometimes performing poorly, which could indicate issues like overfitting, underexplored actions, or unstable learning.
+- **Failed Trials**: Only 6 out of 3017 trials failed, indicating robustness. However, it's still worth investigating if failures are due to resource constraints or specific environments that the agent struggles with.
+- **High Std Dev**: A high standard deviation in performance indicates a lot of variability in how well different agents perform. This could be due to random initialization, exploration strategies, or environmental noise.
+
+### 3. RECOMMENDATIONS
+
+1. **Decrease `base_break_step`**: Try reducing the value from 92,000 to around 85,000-80,000 to see if it helps stabilize performance.
+2. **Increase `norm_action`**: Boosting normalized action values by a small margin (e.g., from 24,800 to 25,000) might help agents make more impactful decisions.
+3. **Reduce `net_dimension`**: Simplify the network by reducing the dimension to around 1024-1100 to see if it reduces overfitting and stabilizes learning.
+4. **Increase `eval_time_gap`**: Evaluate the agent more frequently (e.g., every 75 or 80 steps) to catch better performing states faster.
+5. **Fine-tune `norm_cash_exp` and `norm_reward_exp`**: Adjust these values slightly towards better performance, possibly by increasing them slightly (e.g., from -10 to -9 and -12 to -11).
+
+### 4. SEARCH SPACE REFINEMENT
+
+- **base_break_step**: Narrow the range between 85,000 and 80,000.
+- **net_dimension**: Expand the range around 1024 to include values like 900-1200.
+- **eval_time_gap**: Adjust in small increments (e.g., 65, 70, 75).
+- **norm_cash_exp** and **norm_reward_exp**: Try slightly different values within their current range.
+
+### 5. ALGORITHMIC SUGGESTIONS
+
+- **Entropy Regularization**: Introduce entropy regularization to encourage exploration and potentially improve performance.
+- **Reward Shaping**: Experiment with different reward shaping strategies, such as discounting future rewards more heavily or using risk-adjusted returns.
+- **Learning Rate Annealing**: Gradually decrease the learning rate over time to help stabilize training.
+
+These suggestions should provide a good starting point for further hyperparameter tuning and algorithmic exploration.

@@ -1,0 +1,31 @@
+[
+  {
+    "rationale": "This configuration balances exploitation by staying close to the top performer's range while making slight adjustments that could potentially discover better regions.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1308,
+    "norm_cash_exp": -11,
+    "ppo_epochs": 7
+  },
+  {
+    "rationale": "This configuration explores new regions by increasing the learning rate slightly, which could potentially help escape local optima.",
+    "learning_rate": 0.0002,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "net_dimension": 1400,
+    "norm_cash_exp": -12,
+    "ppo_epochs": 8
+  },
+  {
+    "rationale": "This configuration focuses on improving resource allocation by slightly increasing the value loss coefficient and adjusting the time decay floor, which could help stabilize training.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1308,
+    "norm_cash_exp": -11,
+    "ppo_epochs": 7,
+    "value_loss_coef": 0.65,
+    "time_decay_floor": 0.17
+  }
+]

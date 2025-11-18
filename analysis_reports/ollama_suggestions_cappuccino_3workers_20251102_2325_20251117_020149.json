@@ -1,0 +1,32 @@
+[
+  {
+    "rationale": "Explores a slightly higher learning rate and larger batch size, which may help in capturing more complex patterns.",
+    "learning_rate": 0.001,
+    "batch_size": 1024,
+    "gamma": 0.98,
+    "net_dimension": 2048,
+    "ppo_epochs": 16,
+    "thread_num": 13,
+    "use_lr_schedule": 1
+  },
+  {
+    "rationale": "Tries a smaller learning rate and a slightly smaller batch size to focus on fine-tuning the model without overwhelming it.",
+    "learning_rate": 0.0005,
+    "batch_size": 256,
+    "gamma": 0.995,
+    "net_dimension": 1024,
+    "ppo_epochs": 8,
+    "thread_num": 7,
+    "use_lr_schedule": 0
+  },
+  {
+    "rationale": "Explores a different range of parameters, including a higher gamma value and a smaller net dimension, which may help in balancing exploration and exploitation.",
+    "learning_rate": 0.0008,
+    "batch_size": 512,
+    "gamma": 0.97,
+    "net_dimension": 768,
+    "ppo_epochs": 4,
+    "thread_num": 15,
+    "use_lr_schedule": 1
+  }
+]

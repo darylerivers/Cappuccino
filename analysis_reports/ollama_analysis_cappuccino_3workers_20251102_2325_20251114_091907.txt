@@ -1,0 +1,8 @@
+================================================================================
+OLLAMA TRAINING ANALYSIS REPORT
+Study: cappuccino_3workers_20251102_2325
+Model: qwen2.5-coder:7b
+Date: 2025-11-14 09:19:14.395135
+================================================================================
+
+Error querying Ollama: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=120)

@@ -1,0 +1,29 @@
+[
+  {
+    "rationale": "Explores a slightly higher learning rate and larger batch size, both of which showed positive correlations in the data.",
+    "learning_rate": 0.0002,
+    "batch_size": 1024,
+    "gamma": 0.985,
+    "net_dimension": 1536,
+    "max_drawdown_penalty": 0.075,
+    "time_decay_floor": 0.2
+  },
+  {
+    "rationale": "Explores a slightly lower learning rate and smaller batch size, which can help in exploration of new regions while still maintaining good performance.",
+    "learning_rate": 8e-05,
+    "batch_size": 256,
+    "gamma": 0.995,
+    "net_dimension": 1152,
+    "max_drawdown_penalty": 0.09,
+    "time_decay_floor": 0.17
+  },
+  {
+    "rationale": "Explores a moderate learning rate and batch size, focusing on parameters that showed strong correlations in the data.",
+    "learning_rate": 0.00015,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1344,
+    "max_drawdown_penalty": 0.08,
+    "time_decay_floor": 0.2
+  }
+]

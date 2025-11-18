@@ -1,0 +1,29 @@
+[
+  {
+    "rationale": "Explores near the top performer's cluster in learning_rate, batch_size, and gamma.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1360,
+    "max_grad_norm": 1.7,
+    "time_decay_floor": 0.18
+  },
+  {
+    "rationale": "Explores near the top performer's cluster in lr_schedule_factor, ppo_epochs, and value_loss_coef.",
+    "learning_rate": 0.0005,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "lr_schedule_factor": 0.9,
+    "ppo_epochs": 10,
+    "value_loss_coef": 0.7
+  },
+  {
+    "rationale": "Explores near the top performer's cluster in norm_action, norm_cash_exp, and max_drawdown_penalty.",
+    "learning_rate": 0.0003,
+    "batch_size": 128,
+    "gamma": 0.97,
+    "norm_action": 21000,
+    "norm_cash_exp": -11.5,
+    "max_drawdown_penalty": 0.09
+  }
+]

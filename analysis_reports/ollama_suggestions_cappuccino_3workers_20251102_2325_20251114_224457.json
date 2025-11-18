@@ -1,0 +1,26 @@
+[
+  {
+    "rationale": "Explores the range of net_dimension where top performers cluster, balances exploitation near best and exploration into new regions",
+    "learning_rate": 0.001,
+    "batch_size": 256,
+    "gamma": 0.99,
+    "net_dimension": 1400,
+    "entropy_coef": 0.01
+  },
+  {
+    "rationale": "Explores the range of lr_schedule_factor where top performers cluster, balances exploitation near best and exploration into new regions",
+    "learning_rate": 0.0005,
+    "batch_size": 1024,
+    "gamma": 0.98,
+    "lr_schedule_factor": 0.7,
+    "max_grad_norm": 1.0
+  },
+  {
+    "rationale": "Explores the range of ppo_epochs where top performers cluster, balances exploitation near best and exploration into new regions",
+    "learning_rate": 0.0003,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "ppo_epochs": 8,
+    "use_lr_schedule": 0
+  }
+]

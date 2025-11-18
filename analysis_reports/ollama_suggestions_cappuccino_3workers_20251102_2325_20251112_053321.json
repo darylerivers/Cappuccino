@@ -1,0 +1,28 @@
+[
+  {
+    "rationale": "Explores near the top performer's range with a slightly smaller learning rate and slightly larger batch size.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1536,
+    "max_drawdown_penalty": 0.08,
+    "value_loss_coef": 0.6
+  },
+  {
+    "rationale": "Explores a smaller learning rate and batch size, focusing on the top performer's ranges but within a slightly narrower window.",
+    "learning_rate": 5e-05,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "max_drawdown_penalty": 0.07,
+    "time_decay_floor": 0.15
+  },
+  {
+    "rationale": "Explores a slightly higher learning rate and batch size, potentially discovering new regions that could lead to better performance.",
+    "learning_rate": 0.0002,
+    "batch_size": 768,
+    "gamma": 0.995,
+    "net_dimension": 1792,
+    "max_drawdown_penalty": 0.09,
+    "worker_num": 14
+  }
+]

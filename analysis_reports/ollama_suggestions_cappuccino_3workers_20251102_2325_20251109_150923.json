@@ -1,0 +1,20 @@
+[
+  {
+    "rationale": "Explores a higher lr and batch size near the top performer range, while keeping gamma slightly adjusted.",
+    "learning_rate": 0.00015,
+    "batch_size": 1024,
+    "gamma": 0.98
+  },
+  {
+    "rationale": "Takes a moderate step further into higher lr and slightly smaller batch size, while adjusting gamma to avoid overshooting.",
+    "learning_rate": 0.0002,
+    "batch_size": 512,
+    "gamma": 0.97
+  },
+  {
+    "rationale": "Explores a bit lower in lr but keeps batch size near the top performer range, adjusting gamma to stabilize performance.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.96
+  }
+]

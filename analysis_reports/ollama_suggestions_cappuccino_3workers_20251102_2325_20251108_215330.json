@@ -1,0 +1,23 @@
+[
+  {
+    "rationale": "Exploiting the high correlation with ppo_epochs and use_lr_schedule, while exploring near the top performers.",
+    "ppo_epochs": 15,
+    "use_lr_schedule": 1.0,
+    "min_cash_reserve": 0.25,
+    "max_drawdown_penalty": 0.1
+  },
+  {
+    "rationale": "Exploring higher values of norm_tech_exp, which has a positive correlation with performance.",
+    "norm_tech_exp": -13.0,
+    "lr_schedule_factor": 0.95,
+    "net_dimension": 1792,
+    "max_grad_norm": 1.6
+  },
+  {
+    "rationale": "Balancing exploitation of high correlation with norm_stocks_exp and net_dimension, while introducing some exploration.",
+    "norm_stocks_exp": -6.0,
+    "thread_num": 12,
+    "min_cash_reserve": 0.15,
+    "max_drawdown_penalty": 0.08
+  }
+]

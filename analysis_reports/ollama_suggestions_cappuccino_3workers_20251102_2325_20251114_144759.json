@@ -1,0 +1,26 @@
+[
+  {
+    "rationale": "Explores the high correlation with lr_schedule_factor near 1.0 and moderate exploration in other parameters.",
+    "learning_rate": 0.0001,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "lr_schedule_factor": 0.95,
+    "net_dimension": 1400
+  },
+  {
+    "rationale": "Explores the high correlation with ppo_epochs near 8 and moderate exploration in other parameters.",
+    "learning_rate": 5e-05,
+    "batch_size": 128,
+    "gamma": 0.97,
+    "lr_schedule_factor": 0.88,
+    "ppo_epochs": 9
+  },
+  {
+    "rationale": "Explores the high correlation with use_lr_schedule near 1.0 and moderate exploration in other parameters.",
+    "learning_rate": 0.0002,
+    "batch_size": 512,
+    "gamma": 0.96,
+    "lr_schedule_factor": 0.92,
+    "use_lr_schedule": 0
+  }
+]

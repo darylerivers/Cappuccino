@@ -1,0 +1,48 @@
+================================================================================
+OLLAMA TRAINING ANALYSIS REPORT
+Study: cappuccino_3workers_20251102_2325
+Model: qwen2.5-coder:7b
+Date: 2025-11-16 15:06:07.881913
+================================================================================
+
+### KEY INSIGHTS
+
+1. **Performance Discrepancy**: The top performers have significantly higher values compared to the bottom performers, with a large standard deviation of 0.033209 across all trials.
+
+2. **Hyperparameter Impact**:
+   - `base_break_step` and `norm_action` show relatively small differences between top and bottom performers.
+   - `net_dimension`, `base_target_step`, and `use_lr_schedule` have a noticeable impact, with differences of around 198.400000, 41.000000, and 0.300000 respectively.
+
+### POTENTIAL ISSUES
+
+1. **Standard Deviation**: The high standard deviation indicates significant variability in performance, which could be due to unstable training or overfitting.
+
+2. **NaN Values**: Some trials resulted in NaN values for the best value, indicating potential issues with the agent's behavior during training.
+
+3. **Low Worker Number**: The average number of workers is 14.000000 (±1.0715), which might be suboptimal if it leads to performance issues or instability.
+
+### RECOMMENDATIONS
+
+1. **Increase `base_break_step`**: Since higher values lead to better performance, try increasing the average value of `base_break_step` from 78000 to a higher range, such as [90000, 100000].
+
+2. **Experiment with Learning Rate Schedule**: Given that `use_lr_schedule` has a high impact and the top performers use it, consider trying different learning rate schedules (e.g., linear, cosine annealing) or adjusting the base learning rate.
+
+3. **Tune `net_dimension`**: Since `net_dimension` also shows significant impact, try increasing the average value from 1280 to a higher range, such as [1500, 2048], while keeping other parameters constant for comparison.
+
+### SEARCH SPACE REFINEMENT
+
+1. **Narrow `base_break_step` Range**: Focus on refining the range of `base_break_step` around the top performers' average value (78000) to identify if higher or lower values yield better results.
+
+2. **Expand `net_dimension` Range**: Consider a broader range for `net_dimension` to capture any potential sweet spot that may not be within the current range.
+
+3. **Fine-Tune Learning Rate Schedule**: Narrow the learning rate schedule range and experiment with different schedules to see if it improves performance.
+
+### ALGORITHMIC SUGGESTIONS
+
+1. **Try A2C or PPO+Entropy Regularization**: Experimenting with alternative algorithms like Advantage Actor-Critic (A2C) or adding entropy regularization to PPO could provide insights into whether the current algorithm is optimal for this task.
+
+2. **Implement Experience Replay**: If not already used, implementing experience replay can help stabilize training and reduce variance in performance.
+
+3. **Increase Exploration**: Consider increasing exploration techniques such as noise injection or different types of exploration strategies to better explore the state space.
+
+By focusing on these recommendations, you should be able to refine your hyperparameters and potentially improve the overall performance of your cryptocurrency trading DRL agent.

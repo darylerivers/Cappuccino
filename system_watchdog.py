@@ -251,6 +251,42 @@ class SystemWatchdog:
             self.logger.error(f"Failed to restart training workers: {e}")
             return False
 
+    def _ensure_stored_agent_directory(self, model_dir: Path):
+        """
+        Ensure stored_agent directory exists with model weights.
+        Paper trader requires weights to be in model_dir/stored_agent/
+        """
+        import shutil
+
+        stored_agent_dir = model_dir / "stored_agent"
+
+        # If it already exists and has files, we're good
+        if stored_agent_dir.exists():
+            weight_files = list(stored_agent_dir.glob("*.pth"))
+            if len(weight_files) >= 2:  # At least actor.pth and critic.pth
+                return
+
+        # Create directory
+        stored_agent_dir.mkdir(exist_ok=True, parents=True)
+        self.logger.info(f"Creating stored_agent directory: {stored_agent_dir}")
+
+        # Copy all .pth files from parent directory
+        weight_files = list(model_dir.glob("*.pth"))
+        if not weight_files:
+            self.logger.warning(f"No .pth files found in {model_dir}")
+            return
+
+        copied_count = 0
+        for weight_file in weight_files:
+            try:
+                dest = stored_agent_dir / weight_file.name
+                shutil.copy2(weight_file, dest)
+                copied_count += 1
+            except Exception as e:
+                self.logger.warning(f"Failed to copy {weight_file}: {e}")
+
+        self.logger.info(f"Copied {copied_count} weight files to stored_agent/")
+
     def _restart_paper_trading(self) -> bool:
         """Restart paper trading."""
         self.logger.info("Restarting paper trading...")
@@ -273,6 +309,9 @@ class SystemWatchdog:
                         self.logger.info(f"Using auto-deployed model: {model_dir}")
             except Exception as e:
                 self.logger.warning(f"Could not load deployer state: {e}")
+
+        # Ensure stored_agent directory exists
+        self._ensure_stored_agent_directory(Path(model_dir))
 
         # Start paper trading
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

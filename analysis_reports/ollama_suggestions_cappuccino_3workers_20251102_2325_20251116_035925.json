@@ -1,0 +1,31 @@
+[
+  {
+    "rationale": "Explores a lower learning rate near the top performer's range and increases batch size slightly to enhance stability.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1280,
+    "max_grad_norm": 1.5,
+    "ppo_epochs": 8
+  },
+  {
+    "rationale": "Explores a higher gamma slightly above the top performer's range and increases the number of worker threads to leverage more parallelism.",
+    "learning_rate": 0.0001,
+    "batch_size": 256,
+    "gamma": 0.995,
+    "net_dimension": 1280,
+    "max_grad_norm": 1.4,
+    "ppo_epochs": 8,
+    "worker_num": 15
+  },
+  {
+    "rationale": "Explores a lower net dimension near the top performer's range and decreases the value loss coefficient slightly to reduce variance.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1024,
+    "max_grad_norm": 1.4,
+    "ppo_epochs": 8,
+    "value_loss_coef": 0.6
+  }
+]

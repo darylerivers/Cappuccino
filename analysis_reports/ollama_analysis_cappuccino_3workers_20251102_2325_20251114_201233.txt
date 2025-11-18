@@ -1,0 +1,61 @@
+================================================================================
+OLLAMA TRAINING ANALYSIS REPORT
+Study: cappuccino_3workers_20251102_2325
+Model: qwen2.5-coder:7b
+Date: 2025-11-14 20:12:33.032999
+================================================================================
+
+### 1. KEY INSIGHTS:
+- **Performance Impact**: The top performers consistently have higher values than the bottom performers, indicating that some hyperparameters play a crucial role in improving the agent's performance.
+- **Top Performing Parameters**:
+  - `base_break_step`: The average difference is -22000, suggesting it might be beneficial to decrease this value.
+  - `norm_action`: A slight improvement (1200), indicating that normalizing actions might help marginally.
+  - `net_dimension`: The average difference of -275.2 indicates that reducing network dimensions could be effective.
+  - `eval_time_gap`: Reducing the evaluation time gap (-3) suggests faster feedback loops, which can be beneficial.
+- **Redundant Parameters**:
+  - `lookback` and `norm_cash_exp` have small differences but show significant variation in their values between top and bottom performers. However, the impact on performance is minimal.
+
+### 2. POTENTIAL ISSUES:
+- **NaN Values**: The presence of NaN (Not a Number) values in two top-performing trials suggests potential issues during the training process. These could be due to division by zero or other mathematical errors.
+- **High Variance**: Despite some improvements, the standard deviation (0.032429) is relatively high, indicating inconsistent performance across trials.
+- **Evaluation Time Gap**: The slight difference in `eval_time_gap` (-3 seconds) might not be significant but could indicate a minor imbalance in training and evaluation.
+
+### 3. RECOMMENDATIONS:
+1. **Decrease `base_break_step`**:
+   - **Change**: Set to around 80000-95000.
+   - **Reasoning**: Based on the average difference and the impact it has had, reducing this parameter might help in making more informed decisions.
+
+2. **Reduce Network Dimension**:
+   - **Change**: Set to around 1000-1300.
+   - **Reasoning**: Decreasing network dimensions can reduce memory usage and computational requirements without compromising performance too much.
+
+3. **Increase `batch_size`**:
+   - **Change**: Increase to 2.0 (if applicable).
+   - **Reasoning**: Larger batch sizes can provide more stable updates, but increasing it might require careful monitoring to avoid issues like exploding gradients.
+
+4. **Adjust `norm_cash_exp` and `lookback`**:
+   - **Change**: Set both to their median values.
+   - **Reasoning**: These parameters have minimal impact on performance, so keeping them consistent with the median might reduce noise without affecting results much.
+
+5. **Optimize `eval_time_gap`**:
+   - **Change**: Keep it at 60 seconds unless there are specific reasons to change it.
+   - **Reasoning**: Since there's a slight improvement but no significant impact, maintaining the current value might be optimal for balance.
+
+### 4. SEARCH SPACE REFINEMENT:
+- **Narrow `base_break_step`**:
+  - **Range**: 70000-95000.
+  - **Reasoning**: Narrowing this range will help in fine-tuning it to the most effective value.
+
+- **Expand `net_dimension`**:
+  - **Range**: 800-1400.
+  - **Reasoning**: Expanding this range allows for more exploration of different network sizes, potentially finding an optimal configuration.
+
+- **Adjust `batch_size`**:
+  - **Range**: 1.0-2.5 (if applicable).
+  - **Reasoning**: Expanding this range provides a better understanding of how batch size affects performance and stability.
+
+### 5. ALGORITHMIC SUGGESTIONS:
+- **Try TD3 or SAC**:
+  - **Reasoning**: These algorithms are known for their stability and ability to handle complex environments like financial trading, which might offer improvements over PPO.
+
+By focusing on these recommendations, you can refine the hyperparameters and potentially improve the agent's performance in your cryptocurrency trading environment.

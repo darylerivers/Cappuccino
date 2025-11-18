@@ -1,0 +1,29 @@
+[
+  {
+    "rationale": "Near the top performer's learning rate and slightly higher batch size, with gamma closer to 1.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.995,
+    "net_dimension": 1300,
+    "lr_schedule_factor": 0.85,
+    "value_loss_coef": 0.65
+  },
+  {
+    "rationale": "Exploring a higher learning rate, moderate batch size, and gamma slightly lower than the top performers.",
+    "learning_rate": 0.001,
+    "batch_size": 256,
+    "gamma": 0.985,
+    "net_dimension": 1400,
+    "lr_schedule_factor": 0.75,
+    "value_loss_coef": 0.6
+  },
+  {
+    "rationale": "Exploiting the higher value loss coefficient and slightly lower learning rate, while keeping other parameters near the top performers' range.",
+    "learning_rate": 8e-05,
+    "batch_size": 128,
+    "gamma": 0.995,
+    "net_dimension": 1200,
+    "lr_schedule_factor": 0.9,
+    "value_loss_coef": 0.7
+  }
+]

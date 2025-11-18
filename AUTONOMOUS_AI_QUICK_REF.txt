@@ -1,0 +1,44 @@
+═══════════════════════════════════════════════════════════════════
+                    AUTONOMOUS AI ADVISOR
+                     Quick Reference Card
+═══════════════════════════════════════════════════════════════════
+
+START/STOP
+──────────
+Start:    ./start_autonomous_advisor.sh
+Stop:     ./stop_autonomous_advisor.sh  
+Status:   ./status_autonomous_advisor.sh
+
+MONITORING
+──────────
+Live log:     tail -f logs/autonomous_advisor.log
+State:        cat analysis_reports/advisor_state.json | jq '.'
+Tested:       cat analysis_reports/advisor_state.json | jq '.tested_configs'
+Best value:   cat analysis_reports/advisor_state.json | jq '.best_discovered_value'
+
+KEY FILES
+─────────
+Main log:     logs/autonomous_advisor.log
+State:        analysis_reports/advisor_state.json
+Analysis:     analysis_reports/ollama_analysis_*.txt
+Suggestions:  analysis_reports/ollama_suggestions_*.json
+
+WHAT IT DOES
+────────────
+Every 5 min:  Checks for 50+ new trials
+When found:   Runs AI analysis → Generates configs
+When idle:    Tests configs → Tracks best values
+
+CURRENT STATUS
+──────────────
+PID: 93962
+Study: cappuccino_3workers_20251102_2325
+Model: qwen2.5-coder:7b
+Analysis interval: 50 trials
+Check interval: 300 seconds
+
+FULL DOCS
+─────────
+See: AUTONOMOUS_AI_ADVISOR.md
+
+═══════════════════════════════════════════════════════════════════

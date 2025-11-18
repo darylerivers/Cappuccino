@@ -1,0 +1,29 @@
+[
+  {
+    "rationale": "Explores a higher learning rate and larger batch size, which could help with convergence.",
+    "learning_rate": 0.001,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "net_dimension": 1536,
+    "use_lr_schedule": 1,
+    "lr_schedule_factor": 0.75
+  },
+  {
+    "rationale": "Tries a lower learning rate with a more aggressive learning rate schedule, which could help in fine-tuning the model.",
+    "learning_rate": 5e-05,
+    "batch_size": 128,
+    "gamma": 0.97,
+    "net_dimension": 1152,
+    "use_lr_schedule": 1,
+    "lr_schedule_factor": 0.9
+  },
+  {
+    "rationale": "Explores a different combination of ppo_epochs and thread_num, which could help in balancing parallel processing and model refinement.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.98,
+    "net_dimension": 1472,
+    "ppo_epochs": 8,
+    "thread_num": 12
+  }
+]

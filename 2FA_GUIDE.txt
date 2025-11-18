@@ -1,0 +1,187 @@
+═══════════════════════════════════════════════════════════
+           LOCAL 2FA AUTHENTICATOR - QUICK GUIDE
+═══════════════════════════════════════════════════════════
+
+FEATURES:
+✓ Fully local operation (no cloud, no network)
+✓ Encrypted storage with password protection
+✓ Standard TOTP (Time-based One-Time Password)
+✓ QR code generation for mobile apps
+✓ Watch mode for continuous monitoring
+✓ Compatible with Google Authenticator, Authy, etc.
+
+═══════════════════════════════════════════════════════════
+QUICK START
+═══════════════════════════════════════════════════════════
+
+# Add your first account (auto-generates secret)
+./local_2fa.py add github
+
+# Add account with existing secret
+./local_2fa.py add aws --secret JBSWY3DPEHPK3PXP
+
+# Get a code
+./local_2fa.py get github
+
+# Watch mode (auto-refresh all codes)
+./local_2fa.py watch
+
+═══════════════════════════════════════════════════════════
+ALL COMMANDS
+═══════════════════════════════════════════════════════════
+
+ADD NEW ACCOUNT:
+  ./local_2fa.py add <name>
+  ./local_2fa.py add <name> --secret <SECRET_KEY>
+  ./local_2fa.py add <name> --qr              # Show QR code
+
+REMOVE ACCOUNT:
+  ./local_2fa.py remove <name>
+
+LIST ALL ACCOUNTS:
+  ./local_2fa.py list
+
+GET CODE:
+  ./local_2fa.py get <name>
+
+SHOW QR CODE:
+  ./local_2fa.py qr <name>
+  ./local_2fa.py qr <name> --issuer "MyCompany"
+
+WATCH MODE:
+  ./local_2fa.py watch
+  ./local_2fa.py watch --interval 1
+
+GENERATE SECRET:
+  ./local_2fa.py generate
+
+═══════════════════════════════════════════════════════════
+SETUP WORKFLOW
+═══════════════════════════════════════════════════════════
+
+METHOD 1: Service provides secret key
+────────────────────────────────────────
+1. Service shows you a secret key (like: JBSWY3DPEHPK3PXP)
+2. Run: ./local_2fa.py add myservice --secret JBSWY3DPEHPK3PXP
+3. Get codes: ./local_2fa.py get myservice
+
+METHOD 2: Service shows QR code
+────────────────────────────────────────
+1. Generate new account: ./local_2fa.py add myservice
+2. Show QR code: ./local_2fa.py qr myservice
+3. Scan the QR code with your phone (backup)
+4. Use this tool for desktop: ./local_2fa.py get myservice
+
+METHOD 3: For new service setup
+────────────────────────────────────────
+1. Generate secret: ./local_2fa.py generate
+2. Use that secret in the service's 2FA setup
+3. Add to this tool: ./local_2fa.py add myservice --secret <SECRET>
+
+═══════════════════════════════════════════════════════════
+SECURITY FEATURES
+═══════════════════════════════════════════════════════════
+
+✓ AES-256 encryption (Fernet)
+✓ PBKDF2 key derivation (100,000 iterations)
+✓ File permissions: 600 (owner read/write only)
+✓ Storage location: ~/.local_2fa_vault.enc
+✓ No network access required
+✓ No telemetry or tracking
+
+═══════════════════════════════════════════════════════════
+WATCH MODE EXAMPLE
+═══════════════════════════════════════════════════════════
+
+Running: ./local_2fa.py watch
+
+Output:
+════════════════════════════════════════════════════════════
+  LOCAL 2FA AUTHENTICATOR - WATCH MODE
+════════════════════════════════════════════════════════════
+
+Time: 2025-11-09 15:30:45
+Refresh in: 15 seconds
+
+github                         123456  [██████████░░░░░░░░░░] 15s
+aws                            789012  [██████████░░░░░░░░░░] 15s
+alpaca                         345678  [██████████░░░░░░░░░░] 15s
+
+────────────────────────────────────────────────────────────
+Press Ctrl+C to exit
+
+═══════════════════════════════════════════════════════════
+BACKUP & RESTORE
+═══════════════════════════════════════════════════════════
+
+BACKUP:
+  cp ~/.local_2fa_vault.enc ~/backup/2fa_vault_backup.enc
+
+RESTORE:
+  cp ~/backup/2fa_vault_backup.enc ~/.local_2fa_vault.enc
+
+EXPORT SECRETS (for migration):
+  1. Get codes: ./local_2fa.py qr <account>
+  2. Note the "Manual entry key" shown
+  3. Use that key to set up on another device
+
+═══════════════════════════════════════════════════════════
+TIPS & BEST PRACTICES
+═══════════════════════════════════════════════════════════
+
+✓ Use a strong vault password (12+ characters)
+✓ Backup your vault file regularly
+✓ Keep recovery codes from services separately
+✓ Test new accounts immediately after setup
+✓ Use watch mode for easy access to multiple accounts
+✓ Add --qr when setting up to create mobile backup
+
+═══════════════════════════════════════════════════════════
+TROUBLESHOOTING
+═══════════════════════════════════════════════════════════
+
+Wrong vault password:
+  - No recovery possible if password is lost
+  - Restore from backup if available
+  - Re-setup accounts if no backup
+
+Code not working:
+  - Check system time is correct (TOTP is time-based)
+  - Verify secret key is correct
+  - Wait for new code (30-second window)
+
+═══════════════════════════════════════════════════════════
+EXAMPLE SESSION
+═══════════════════════════════════════════════════════════
+
+$ ./local_2fa.py add github
+Creating new vault...
+Choose vault password: ********
+Confirm password: ********
+Added account: github
+
+QR code for easy mobile app setup:
+█████████████████████████████
+█████████████████████████████
+███████       ███       ██████
+███       ███       ███    ███
+   (QR code displayed)
+
+Manual entry key: JBSWY3DPEHPK3PXP
+URI: otpauth://totp/github?secret=JBSWY3DPEHPK3PXP&issuer=Local2FA
+
+$ ./local_2fa.py get github
+Vault password: ********
+
+github: 123456
+Valid for 23 more seconds
+
+$ ./local_2fa.py list
+Vault password: ********
+
+Configured accounts:
+  1. github
+
+═══════════════════════════════════════════════════════════
+
+For more help: ./local_2fa.py --help

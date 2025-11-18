@@ -1,0 +1,44 @@
+[
+  {
+    "rationale": "Explores a smaller batch size and higher learning rate, which might help with training stability and convergence.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1344,
+    "max_drawdown_penalty": 0.08,
+    "time_decay_floor": 0.17,
+    "use_lr_schedule": 0.35,
+    "norm_cash_exp": -12.0,
+    "norm_reward_exp": -10.6,
+    "norm_stocks_exp": -7.9,
+    "norm_tech_exp": -15.8
+  },
+  {
+    "rationale": "Tunes the network dimension and learning rate to values closer to those of top performers, while exploring a slightly larger batch size.",
+    "learning_rate": 0.00012,
+    "batch_size": 1024,
+    "gamma": 0.985,
+    "net_dimension": 1376,
+    "max_drawdown_penalty": 0.085,
+    "time_decay_floor": 0.165,
+    "use_lr_schedule": 0.4,
+    "norm_cash_exp": -12.5,
+    "norm_reward_exp": -10.9,
+    "norm_stocks_exp": -7.5,
+    "norm_tech_exp": -15.3
+  },
+  {
+    "rationale": "Explores a lower learning rate and a slightly smaller network dimension, which might help with generalization.",
+    "learning_rate": 8e-05,
+    "batch_size": 256,
+    "gamma": 0.97,
+    "net_dimension": 1320,
+    "max_drawdown_penalty": 0.07,
+    "time_decay_floor": 0.16,
+    "use_lr_schedule": 0.38,
+    "norm_cash_exp": -13.5,
+    "norm_reward_exp": -9.5,
+    "norm_stocks_exp": -8.0,
+    "norm_tech_exp": -16.2
+  }
+]

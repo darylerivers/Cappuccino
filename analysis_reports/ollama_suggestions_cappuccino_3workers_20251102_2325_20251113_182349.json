@@ -1,0 +1,29 @@
+[
+  {
+    "rationale": "Explores near the top performer's region with a slight variation.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1300,
+    "max_grad_norm": 1.7,
+    "value_loss_coef": 0.65
+  },
+  {
+    "rationale": "Explores a slightly different region with moderate changes.",
+    "learning_rate": 5e-05,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "net_dimension": 1400,
+    "max_grad_norm": 1.5,
+    "value_loss_coef": 0.7
+  },
+  {
+    "rationale": "Explores a wider region by increasing some parameters.",
+    "learning_rate": 0.0002,
+    "batch_size": 1024,
+    "gamma": 0.995,
+    "net_dimension": 1500,
+    "max_grad_norm": 2.0,
+    "value_loss_coef": 0.6
+  }
+]

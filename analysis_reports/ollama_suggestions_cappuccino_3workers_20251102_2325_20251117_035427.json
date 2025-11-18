@@ -1,0 +1,29 @@
+[
+  {
+    "rationale": "This config focuses on parameters with high correlation to performance, such as learning_rate and gamma. It also explores around the ranges where top performers cluster.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1536,
+    "max_grad_norm": 1.8,
+    "value_loss_coef": 0.75
+  },
+  {
+    "rationale": "This config balances exploitation (near best) and exploration (new regions) by slightly varying parameters near the top performers.",
+    "learning_rate": 0.0002,
+    "batch_size": 1024,
+    "gamma": 0.98,
+    "net_dimension": 1280,
+    "max_grad_norm": 1.5,
+    "value_loss_coef": 0.6
+  },
+  {
+    "rationale": "This config explores new regions by significantly varying parameters while maintaining high correlation to performance.",
+    "learning_rate": 0.0003,
+    "batch_size": 256,
+    "gamma": 1.0,
+    "net_dimension": 2048,
+    "max_grad_norm": 2.0,
+    "value_loss_coef": 0.9
+  }
+]

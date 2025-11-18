@@ -1,0 +1,29 @@
+[
+  {
+    "rationale": "High correlation with performance and exploration near the best regions",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1536,
+    "max_grad_norm": 1.8,
+    "use_lr_schedule": 1.0
+  },
+  {
+    "rationale": "High correlation with performance and exploitation near the best regions",
+    "learning_rate": 5e-05,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "net_dimension": 1280,
+    "max_grad_norm": 1.2,
+    "use_lr_schedule": 0.0
+  },
+  {
+    "rationale": "High correlation with performance and exploration near the best regions",
+    "learning_rate": 1e-05,
+    "batch_size": 1024,
+    "gamma": 0.97,
+    "net_dimension": 1344,
+    "max_grad_norm": 2.0,
+    "use_lr_schedule": 0.5
+  }
+]

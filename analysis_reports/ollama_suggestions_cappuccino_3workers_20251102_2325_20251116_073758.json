@@ -1,0 +1,31 @@
+[
+  {
+    "rationale": "Explores near-optimal learning_rate and batch_size, with high gamma to stabilize training.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1536,
+    "max_grad_norm": 1.0,
+    "ppo_epochs": 10
+  },
+  {
+    "rationale": "Balances exploration by adjusting lr_schedule_factor and lr_schedule_type, while keeping key parameters near-optimal.",
+    "learning_rate": 5e-05,
+    "batch_size": 256,
+    "gamma": 0.99,
+    "lr_schedule_factor": 0.75,
+    "lr_schedule_type": 1,
+    "net_dimension": 1024,
+    "max_grad_norm": 0.5,
+    "ppo_epochs": 12
+  },
+  {
+    "rationale": "Tries a smaller net_dimension to reduce complexity, while slightly increasing ppo_epochs for potentially better convergence.",
+    "learning_rate": 7.5e-05,
+    "batch_size": 384,
+    "gamma": 0.99,
+    "net_dimension": 896,
+    "max_grad_norm": 1.2,
+    "ppo_epochs": 14
+  }
+]

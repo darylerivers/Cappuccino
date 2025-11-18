@@ -1,0 +1,97 @@
+services:
+  cappuccino-train:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cappuccino:latest
+    container_name: cappuccino-training
+
+    # GPU support
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+    # Environment variables
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - PYTHONUNBUFFERED=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+    # Load environment variables from .env file
+    env_file:
+      - .env
+
+    # Volume mounts
+    volumes:
+      # Mount cappuccino directory (for live code updates)
+      - .:/workspace/cappuccino
+
+      # Mount parent FinRL_Crypto directory (required for imports)
+      - ../ghost/FinRL_Crypto:/workspace/ghost/FinRL_Crypto
+
+      # Mount data directories
+      - ./data:/workspace/cappuccino/data
+      - ./logs:/workspace/cappuccino/logs
+      - ./databases:/workspace/cappuccino/databases
+      - ./train_results:/workspace/cappuccino/train_results
+      - ./plots_and_metrics:/workspace/cappuccino/plots_and_metrics
+
+      # Optionally mount Ollama models (if running Ollama in container)
+      - ~/.ollama:/root/.ollama
+
+    # Network configuration
+    network_mode: "host"
+
+    # Command to run (override as needed)
+    command: >
+      python 1_optimize_unified.py
+      --n-trials 100
+      --gpu 0
+      --study-name cappuccino_trial
+      --storage sqlite:///databases/optuna_cappuccino.db
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Keep container running for interactive use
+    stdin_open: true
+    tty: true
+
+  # Optional: Optuna Dashboard for monitoring
+  optuna-dashboard:
+    image: ghcr.io/optuna/optuna-dashboard:latest
+    container_name: cappuccino-dashboard
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./databases:/workspace/databases
+    command: >
+      optuna-dashboard sqlite:///workspace/databases/optuna_cappuccino.db
+    restart: unless-stopped
+    depends_on:
+      - cappuccino-train
+
+  # Optional: Ollama service for sentiment analysis
+  # NOTE: Commented out because Ollama is already running on host (localhost:11434)
+  # The cappuccino-train service uses network_mode: "host" and can access the host's Ollama
+  #
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: cappuccino-ollama
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ~/.ollama:/root/.ollama
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]
+  #   restart: unless-stopped

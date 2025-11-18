@@ -1,0 +1,47 @@
+[
+  {
+    "rationale": "Explores a higher learning rate and larger batch size which often perform well in deep learning models.",
+    "learning_rate": 0.001,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "net_dimension": 1728,
+    "norm_action": 18000,
+    "value_loss_coef": 0.85
+  },
+  {
+    "rationale": "Explores a lower learning rate and smaller batch size which can sometimes lead to better generalization.",
+    "learning_rate": 1e-05,
+    "batch_size": 64,
+    "gamma": 0.97,
+    "net_dimension": 1408,
+    "norm_action": 15000,
+    "value_loss_coef": 0.75
+  },
+  {
+    "rationale": "Explores a moderate learning rate and batch size, focusing on parameters that showed strong correlation.",
+    "learning_rate": 0.0005,
+    "batch_size": 128,
+    "gamma": 0.995,
+    "net_dimension": 1600,
+    "norm_action": 17000,
+    "value_loss_coef": 0.8
+  },
+  {
+    "rationale": "Explores a higher learning rate and smaller batch size, focusing on parameters that showed strong correlation.",
+    "learning_rate": 0.0003,
+    "batch_size": 32,
+    "gamma": 0.96,
+    "net_dimension": 1800,
+    "norm_action": 16000,
+    "value_loss_coef": 0.8
+  },
+  {
+    "rationale": "Explores a lower learning rate and larger batch size, focusing on parameters that showed strong correlation.",
+    "learning_rate": 5e-05,
+    "batch_size": 256,
+    "gamma": 0.95,
+    "net_dimension": 1536,
+    "norm_action": 17500,
+    "value_loss_coef": 0.7
+  }
+]

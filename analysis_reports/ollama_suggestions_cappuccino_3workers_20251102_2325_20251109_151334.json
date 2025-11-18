@@ -1,0 +1,26 @@
+[
+  {
+    "rationale": "Explores the high correlation of 'net_dimension' around 1340 and slightly increases 'lr_schedule_factor' to potentially improve training stability.",
+    "learning_rate": 0.001,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "net_dimension": 1350,
+    "lr_schedule_factor": 0.93
+  },
+  {
+    "rationale": "Explores the high correlation of 'norm_stocks_exp' around -7 and slightly increases 'time_decay_floor' to potentially stabilize the model's focus on stock normalization.",
+    "learning_rate": 0.0005,
+    "batch_size": 128,
+    "gamma": 0.97,
+    "norm_stocks_exp": -6.5,
+    "time_decay_floor": 0.2
+  },
+  {
+    "rationale": "Explores the high correlation of 'volatility_penalty' around 0.03 and slightly decreases 'max_drawdown_penalty' to potentially reduce the model's sensitivity to drawdowns.",
+    "learning_rate": 0.0008,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "volatility_penalty": 0.025,
+    "max_drawdown_penalty": 0.07
+  }
+]

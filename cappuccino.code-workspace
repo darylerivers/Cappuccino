@@ -1,0 +1,65 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/__pycache__"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/data"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/databases"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/docs"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/drl_agents"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/finrl_refactored"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/logs"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/model_queue"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/models"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/paper_trades"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/path"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/plots_and_metrics"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/sentiment_analysis"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/sentiment_data_collection"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/SentimentData"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/strategy_reports"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/tools"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/train"
+		},
+		{
+			"path": "../ghost/FinRL_Crypto/train_results"
+		}
+	],
+	"settings": {}
+}

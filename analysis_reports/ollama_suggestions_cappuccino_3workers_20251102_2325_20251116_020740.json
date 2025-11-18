@@ -1,0 +1,26 @@
+[
+  {
+    "rationale": "This config explores a slightly higher learning rate and batch size, focusing on parameters with high correlation to performance.",
+    "learning_rate": 0.001,
+    "batch_size": 2048,
+    "gamma": 0.995,
+    "net_dimension": 1536,
+    "value_loss_coef": 0.7
+  },
+  {
+    "rationale": "This config focuses on the top performer regions for net dimension and value loss coefficient, with a slight adjustment in other parameters.",
+    "learning_rate": 0.0005,
+    "batch_size": 1024,
+    "gamma": 0.99,
+    "net_dimension": 1280,
+    "value_loss_coef": 0.6
+  },
+  {
+    "rationale": "This config tries a different combination near the top performer regions, focusing on lr_schedule_factor and ppo_epochs.",
+    "learning_rate": 0.00075,
+    "batch_size": 512,
+    "gamma": 0.995,
+    "net_dimension": 1408,
+    "ppo_epochs": 10
+  }
+]

@@ -255,15 +255,15 @@ class PerformanceMonitor:
             # Get latest row
             latest = rows[-1]
 
-            # Count trades
-            trade_count = sum(1 for row in rows if float(row.get('portfolio_value', 0)) != 1000.0)
+            # Count trades - use 'total_asset' column (not 'portfolio_value')
+            trade_count = sum(1 for row in rows if float(row.get('total_asset', 0)) != 1000.0)
 
             return {
                 "status": "active",
                 "csv_file": str(latest_csv),
                 "total_rows": len(rows),
                 "trade_count": trade_count,
-                "latest_portfolio_value": float(latest.get('portfolio_value', 0)),
+                "latest_portfolio_value": float(latest.get('total_asset', 0)),  # Fixed: use 'total_asset'
                 "latest_timestamp": latest.get('timestamp', ''),
             }
 

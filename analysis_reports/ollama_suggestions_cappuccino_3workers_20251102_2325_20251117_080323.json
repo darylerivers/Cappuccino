@@ -1,0 +1,32 @@
+[
+  {
+    "rationale": "Explores a lower learning rate near the best-performing region and increases batch size to improve generalization.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1300,
+    "ppo_epochs": 10,
+    "time_decay_floor": 0.2,
+    "use_lr_schedule": 0.8
+  },
+  {
+    "rationale": "Tends to balance exploration by using a slightly different learning rate and increases the number of worker threads for potential parallel processing benefits.",
+    "learning_rate": 0.0003,
+    "batch_size": 256,
+    "gamma": 0.985,
+    "net_dimension": 1400,
+    "ppo_epochs": 12,
+    "time_decay_floor": 0.22,
+    "use_lr_schedule": 0.7
+  },
+  {
+    "rationale": "Focuses on a different region by lowering the learning rate and increasing the volatility penalty to adapt better to market volatility.",
+    "learning_rate": 0.0002,
+    "batch_size": 128,
+    "gamma": 0.975,
+    "net_dimension": 1350,
+    "ppo_epochs": 8,
+    "time_decay_floor": 0.18,
+    "use_lr_schedule": 0.6
+  }
+]

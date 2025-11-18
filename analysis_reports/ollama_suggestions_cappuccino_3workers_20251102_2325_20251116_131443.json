@@ -1,0 +1,26 @@
+[
+  {
+    "rationale": "Explores near the top performers in net_dimension, lr_schedule_factor, and use_lr_schedule.",
+    "net_dimension": 1280,
+    "lr_schedule_factor": 0.65,
+    "use_lr_schedule": 0.7,
+    "learning_rate": 0.0001,
+    "batch_size": 512
+  },
+  {
+    "rationale": "Combines high correlation parameters with some exploration around the top performers.",
+    "net_dimension": 1920,
+    "lr_schedule_factor": 0.85,
+    "use_lr_schedule": 0.9,
+    "learning_rate": 5e-05,
+    "batch_size": 768
+  },
+  {
+    "rationale": "Tries a balanced approach by using parameters that have high correlation while also exploring new regions.",
+    "net_dimension": 1400,
+    "lr_schedule_factor": 0.55,
+    "use_lr_schedule": 0.6,
+    "learning_rate": 8e-05,
+    "batch_size": 1024
+  }
+]

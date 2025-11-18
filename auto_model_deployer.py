@@ -251,6 +251,38 @@ class AutoModelDeployer:
         except Exception as e:
             self.logger.warning(f"Failed to create best_trial file: {e}")
 
+    def ensure_stored_agent_directory(self, model_dir: Path):
+        """
+        Ensure stored_agent directory exists with model weights.
+        Paper trader requires weights to be in model_dir/stored_agent/
+        """
+        stored_agent_dir = model_dir / "stored_agent"
+
+        # If it already exists, verify it has all files
+        if stored_agent_dir.exists():
+            weight_files = list(stored_agent_dir.glob("*.pth"))
+            if len(weight_files) >= 2:  # At least actor.pth and critic.pth
+                self.logger.info(f"stored_agent directory already exists with {len(weight_files)} files")
+                return
+
+        # Create directory
+        stored_agent_dir.mkdir(exist_ok=True)
+        self.logger.info(f"Creating stored_agent directory: {stored_agent_dir}")
+
+        # Copy all .pth files from parent directory
+        weight_files = list(model_dir.glob("*.pth"))
+        if not weight_files:
+            self.logger.warning(f"No .pth files found in {model_dir}")
+            return
+
+        copied_count = 0
+        for weight_file in weight_files:
+            dest = stored_agent_dir / weight_file.name
+            shutil.copy2(weight_file, dest)
+            copied_count += 1
+
+        self.logger.info(f"Copied {copied_count} weight files to stored_agent/")
+
     def stop_current_paper_trader(self):
         """Stop currently running paper trader."""
         pid = self.state.get("current_paper_trader_pid")
@@ -288,6 +320,9 @@ class AutoModelDeployer:
 
         # Create best_trial file if needed
         self.create_best_trial_file(trial_id, model_dir)
+
+        # Ensure stored_agent directory exists with weights
+        self.ensure_stored_agent_directory(model_dir)
 
         # Stop current paper trader
         self.stop_current_paper_trader()
