@@ -1,0 +1,70 @@
+name: LM Studio + CodeSage Setup
+version: 1.0.0
+schema: v1
+
+models:
+  - name: Qwen2.5-7B (Local)
+    provider: lmstudio
+    model: qwen2.5-7b-instruct
+    apiBase: http://localhost:1234/v1
+    contextLength: 16384   # ⚠️ MUST match LM Studio's setting
+
+mcpServers:
+  # 1️⃣ FILESYSTEM – mandatory for reading/writing files
+  - name: filesystem
+    transport:
+      type: stdio
+      command: npx
+      args:
+        - -y
+        - "@modelcontextprotocol/server-filesystem"
+        - /absolute/path/to/your/project   # <- ONLY this directory
+    alwaysAllow:
+      - readFile
+      - writeFile
+      - listDirectory
+
+  # 2️⃣ CODESAGE – semantic search, review, impact analysis
+  - name: codesage
+    transport:
+      type: stdio
+      command: codesage
+      args:
+        - mcp
+        - serve
+        - --global
+      cwd: /absolute/path/to/your/project   # <- restrict to project
+    alwaysAllow:
+      - search_code
+      - review_code
+      - explain_concept
+      - trace_flow
+      - suggest_approach
+
+  # 3️⃣ (Optional) DESKTOP COMMANDER – terminal commands
+  - name: desktop-commander
+    transport:
+      type: stdio
+      command: npx
+      args:
+        - -y
+        - "@wonderwhy-er/desktop-commander@latest"
+      env:
+        ALLOWED_COMMANDS: "git,npm,node,python,pytest,ls,cat,echo"
+        ALLOWED_DIRECTORIES: "/absolute/path/to/your/project"
+    alwaysAllow:
+      - execute_command
+      - read_output
+    disabled: true   # set to false if you need it, but be careful!
+
+  # 4️⃣ (Optional) Context7 – only if you need long‑term memory
+  - name: context7
+    transport:
+      type: stdio
+      command: npx
+      args:
+        - -y
+        - "@upstash/context7-mcp"
+        - --api-key
+        - "ctx7sk-c6b9144d-b9dc-4fd1-ba41-3d7ec0139e00"
+    disabled: true   # enable only if you use it

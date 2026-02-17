@@ -1,0 +1,201 @@
+{
+  "timestamp": "2025-12-08T08:34:32.376150",
+  "total_trials_analyzed": 9320,
+  "archived_trials": 3461,
+  "current_ensemble_size": 20,
+  "correlations": {
+    "norm_tech_exp": -0.3532,
+    "min_cash_reserve": -0.3259,
+    "gamma": 0.2812,
+    "norm_action": 0.2729,
+    "volatility_penalty": -0.2521,
+    "concentration_penalty": 0.195,
+    "learning_rate": -0.194,
+    "lookback": 0.1877,
+    "norm_reward_exp": -0.173,
+    "thread_num": 0.1663,
+    "net_dimension": 0.1602,
+    "worker_num": 0.1488,
+    "kl_target": -0.1353,
+    "gae_lambda": 0.1258,
+    "batch_size": -0.1211,
+    "clip_range": 0.1145,
+    "lr_schedule_type": 0.0965,
+    "eval_time_gap": 0.0864,
+    "max_grad_norm": 0.0782,
+    "lr_schedule_factor": -0.0708,
+    "time_decay_floor": 0.0658,
+    "base_target_step": 0.0634,
+    "value_loss_coef": -0.0529,
+    "base_break_step": 0.051,
+    "ppo_epochs": 0.0463,
+    "norm_stocks_exp": 0.0412,
+    "use_lr_schedule": -0.0361,
+    "norm_cash_exp": -0.034,
+    "adam_epsilon": -0.0246,
+    "max_drawdown_penalty": -0.0148,
+    "entropy_coef": -0.0104,
+    "trailing_stop_pct": 0.0001
+  },
+  "parameter_sweet_spots": {
+    "norm_tech_exp": {
+      "mean": -15.253219,
+      "std": 0.689214,
+      "min": -18.0,
+      "max": -15.0
+    },
+    "min_cash_reserve": {
+      "mean": 0.079002,
+      "std": 0.043671,
+      "min": 0.03,
+      "max": 0.25
+    },
+    "gamma": {
+      "mean": 0.980665,
+      "std": 0.011716,
+      "min": 0.89,
+      "max": 0.99
+    },
+    "norm_action": {
+      "mean": 23159.334764,
+      "std": 2907.375854,
+      "min": 9000.0,
+      "max": 25000.0
+    },
+    "volatility_penalty": {
+      "mean": 0.005765,
+      "std": 0.008675,
+      "min": 0.0,
+      "max": 0.04
+    }
+  },
+  "interactions": [
+    {
+      "params": [
+        "norm_tech_exp",
+        "min_cash_reserve"
+      ],
+      "correlation": 0.2815
+    },
+    {
+      "params": [
+        "norm_tech_exp",
+        "gamma"
+      ],
+      "correlation": -0.3902
+    },
+    {
+      "params": [
+        "norm_tech_exp",
+        "norm_action"
+      ],
+      "correlation": -0.3358
+    },
+    {
+      "params": [
+        "min_cash_reserve",
+        "gamma"
+      ],
+      "correlation": -0.3204
+    },
+    {
+      "params": [
+        "min_cash_reserve",
+        "norm_action"
+      ],
+      "correlation": -0.1309
+    },
+    {
+      "params": [
+        "gamma",
+        "norm_action"
+      ],
+      "correlation": 0.2835
+    }
+  ],
+  "top_performers": {
+    "count": 20,
+    "mean_value": 0.143452,
+    "trial_numbers": [
+      191,
+      192,
+      26,
+      83,
+      25,
+      157,
+      156,
+      87,
+      86,
+      195,
+      172,
+      179,
+      177,
+      173,
+      194,
+      178,
+      166,
+      180,
+      144,
+      190
+    ]
+  },
+  "overlooked_trials": [
+    {
+      "trial_number": 191,
+      "value": 0.156558,
+      "rank_overall": 1
+    },
+    {
+      "trial_number": 192,
+      "value": 0.156517,
+      "rank_overall": 2
+    },
+    {
+      "trial_number": 26,
+      "value": 0.156289,
+      "rank_overall": 3
+    },
+    {
+      "trial_number": 83,
+      "value": 0.155774,
+      "rank_overall": 4
+    },
+    {
+      "trial_number": 25,
+      "value": 0.155465,
+      "rank_overall": 5
+    },
+    {
+      "trial_number": 157,
+      "value": 0.155207,
+      "rank_overall": 6
+    },
+    {
+      "trial_number": 87,
+      "value": 0.154877,
+      "rank_overall": 8
+    },
+    {
+      "trial_number": 86,
+      "value": 0.154592,
+      "rank_overall": 9
+    },
+    {
+      "trial_number": 195,
+      "value": 0.133606,
+      "rank_overall": 10
+    },
+    {
+      "trial_number": 172,
+      "value": 0.133569,
+      "rank_overall": 11
+    }
+  ],
+  "statistics": {
+    "mean_value": 0.025252,
+    "std_value": 0.033291,
+    "best_value": 0.156558,
+    "worst_value": -0.116391
+  },
+  "ai_insights": "### KEY FINDINGS:\n1. **High Correlations**: Several parameters show significant correlations with performance metrics such as `gamma`, `norm_tech_exp`, and `min_cash_reserve`. These high correlations suggest that these parameters play a crucial role in determining the success of training trials.\n2. **Negative Correlations**: Parameters like `volatility_penalty` and `entropy_coef` have negative correlations, indicating that higher values might lead to better performance.\n3. **Mean Performance**: The mean value of the archived trials is relatively low (0.025), suggesting that there is significant room for improvement in the current training configurations.\n\n### OVERLOOKED OPPORTUNITIES:\n1. **High-Performing Configurations**: Trials 191, 192, and 26 have values above 0.15, which are significantly higher than the mean value. These trials should be reconsidered as they offer valuable insights into what configurations might work well.\n2. **Top Performers**: The top performers (trials 191, 192, etc.) consistently outperform the mean by a substantial margin, indicating that these configurations are worth further exploration and optimization.\n\n### PARAMETER RECOMMENDATIONS:\n1. **norm_tech_exp**: Focus on values between -15.0 and -18.0 based on its sweet spot.\n2. **min_cash_reserve**: Aim for values around 0.079, which is the mean value.\n3. **gamma**: Set gamma to a value close to 0.98, as it has a high positive correlation with performance.\n4. **norm_action**: Target action values between 23159 and 25000, based on its sweet spot.\n5. **volatility_penalty**: Use values slightly above the mean (around 0.006), as higher penalties might lead to better performance.\n\n### INTERACTIONS TO EXPLORE:\n1. **norm_tech_exp & gamma**: Investigate how varying `gamma` affects the performance when `norm_tech_exp` is within its optimal range.\n2. **min_cash_reserve & norm_action**: Explore how different combinations of `min_cash_reserve` and `norm_action` impact performance, especially considering their negative correlation.\n3. **volatility_penalty & entropy_coef**: Analyze how adjusting both parameters together affects the overall performance.\n\n### ACTIONABLE SUGGESTIONS:\n1. **Revisit High-Performing Trials**: Conduct a detailed analysis of trials 191, 192, and 26 to identify specific configurations that led to their success. Implement these configurations in new training runs.\n2. **Fine-Tune Parameter Ranges**: Based on the sweet spots identified, fine-tune the ranges for `norm_tech_exp`, `min_cash_reserve`, `gamma`, `norm_action`, and `volatility_penalty`. For example, set `norm_tech_exp` between -15.0 and -18.0, `gamma` around 0.98, and `norm_action` between 23159 and 25000.\n3. **Explore Interactions**: Implement experiments that explore the interactions between parameters like `norm_tech_exp` and `gamma`, as well as `min_cash_reserve` and `norm_action`. This will help in understanding how different combinations of these parameters affect performance.\n\nBy focusing on these key findings, overlooked opportunities, parameter recommendations, interactions to explore, and actionable suggestions, future training runs can be optimized for better performance."
+}

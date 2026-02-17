@@ -1,0 +1,29 @@
+[
+  {
+    "rationale": "Exploiting the top performers' cluster around lr=0.0001, batch_size=512, and gamma=0.99",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1536,
+    "value_loss_coef": 0.75,
+    "lr_schedule_factor": 0.8
+  },
+  {
+    "rationale": "Exploring new regions near lr=0.0002, batch_size=1024, and gamma=0.98",
+    "learning_rate": 0.0002,
+    "batch_size": 1024,
+    "gamma": 0.98,
+    "net_dimension": 1792,
+    "value_loss_coef": 0.5,
+    "lr_schedule_factor": 0.6
+  },
+  {
+    "rationale": "Balancing exploitation and exploration by near lr=0.0003, batch_size=256, and gamma=0.97",
+    "learning_rate": 0.0003,
+    "batch_size": 256,
+    "gamma": 0.97,
+    "net_dimension": 1280,
+    "value_loss_coef": 0.6,
+    "lr_schedule_factor": 0.7
+  }
+]

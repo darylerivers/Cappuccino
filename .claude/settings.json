@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/home/mrc/experiment/cappuccino/**)",
+      "Bash(python:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(sqlite3:*)",
+      "Bash(tree:*)",
+      "Bash(wc:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)"
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+### Copy and paste these commands one by one ###
+
+# Step 1: Create systemd override directory
+sudo mkdir -p /etc/systemd/system/ollama.service.d
+
+# Step 2: Create the ROCm environment config file
+sudo tee /etc/systemd/system/ollama.service.d/rocm.conf > /dev/null <<'EOF'
+[Service]
+Environment="HSA_OVERRIDE_GFX_VERSION=11.0.0"
+Environment="HIP_VISIBLE_DEVICES=0"
+Environment="ROCR_VISIBLE_DEVICES=0"
+Environment="GPU_DEVICE_ORDINAL=0"
+Environment="OLLAMA_DEBUG=1"
+EOF
+
+# Step 3: Reload systemd
+sudo systemctl daemon-reload
+
+# Step 4: Restart Ollama
+sudo systemctl restart ollama
+
+# Step 5: Wait for it to start
+sleep 5
+
+# Step 6: Check if GPU is detected
+journalctl -u ollama -n 50 --no-pager | grep -i "gpu\|rocm"
+
+# Step 7: Verify GLM is using GPU
+ollama ps
+
+### Expected output: "100% GPU" instead of "100% CPU" ###

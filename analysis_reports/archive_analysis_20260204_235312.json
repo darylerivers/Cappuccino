@@ -1,0 +1,141 @@
+{
+  "timestamp": "2026-02-04T23:52:59.396731",
+  "total_trials_analyzed": 11,
+  "archived_trials": 3461,
+  "current_ensemble_size": 5,
+  "correlations": {
+    "volatility_penalty": -0.6688,
+    "max_drawdown_penalty": -0.6374,
+    "base_target_step": 0.62,
+    "eval_time_gap": -0.5055,
+    "norm_action": -0.4995,
+    "norm_reward_exp": -0.441,
+    "thread_num": 0.3708,
+    "ppo_epochs": 0.3635,
+    "gamma": 0.3425,
+    "max_grad_norm": 0.336,
+    "learning_rate": 0.2931,
+    "lookback": -0.2879,
+    "net_dimension": -0.282,
+    "norm_tech_exp": 0.2813,
+    "min_cash_reserve": 0.2806,
+    "lr_schedule_factor": -0.2717,
+    "clip_range": 0.2714,
+    "batch_size": 0.2325,
+    "gae_lambda": -0.2283,
+    "use_lr_schedule": -0.1902,
+    "entropy_coef": -0.1755,
+    "adam_epsilon": -0.1636,
+    "value_loss_coef": 0.1571,
+    "concentration_penalty": 0.1563,
+    "kl_target": 0.133,
+    "base_break_step": 0.1217,
+    "norm_cash_exp": -0.1047,
+    "lr_schedule_type": -0.0977,
+    "worker_num": -0.083,
+    "time_decay_floor": 0.0755,
+    "trailing_stop_pct": 0.0682,
+    "norm_stocks_exp": -0.0186
+  },
+  "parameter_sweet_spots": {
+    "volatility_penalty": {
+      "mean": 0.005,
+      "std": 0.007071,
+      "min": 0.0,
+      "max": 0.01
+    },
+    "max_drawdown_penalty": {
+      "mean": 0.015,
+      "std": 0.021213,
+      "min": 0.0,
+      "max": 0.03
+    },
+    "base_target_step": {
+      "mean": 147456.0,
+      "std": 23170.475006,
+      "min": 131072.0,
+      "max": 163840.0
+    },
+    "eval_time_gap": {
+      "mean": 45.0,
+      "std": 21.213203,
+      "min": 30.0,
+      "max": 60.0
+    },
+    "norm_action": {
+      "mean": 8000.0,
+      "std": 2828.427125,
+      "min": 6000.0,
+      "max": 10000.0
+    }
+  },
+  "interactions": [
+    {
+      "params": [
+        "volatility_penalty",
+        "max_drawdown_penalty"
+      ],
+      "correlation": -0.64
+    },
+    {
+      "params": [
+        "volatility_penalty",
+        "base_target_step"
+      ],
+      "correlation": -0.643
+    },
+    {
+      "params": [
+        "volatility_penalty",
+        "eval_time_gap"
+      ],
+      "correlation": -0.6101
+    },
+    {
+      "params": [
+        "max_drawdown_penalty",
+        "base_target_step"
+      ],
+      "correlation": -0.6343
+    },
+    {
+      "params": [
+        "max_drawdown_penalty",
+        "eval_time_gap"
+      ],
+      "correlation": -0.5986
+    },
+    {
+      "params": [
+        "base_target_step",
+        "eval_time_gap"
+      ],
+      "correlation": -0.4511
+    }
+  ],
+  "top_performers": {
+    "count": 11,
+    "mean_value": 0.00096,
+    "trial_numbers": [
+      250,
+      19,
+      3013,
+      3032,
+      3034,
+      244,
+      15,
+      2645,
+      427,
+      175,
+      236
+    ]
+  },
+  "overlooked_trials": [],
+  "statistics": {
+    "mean_value": 0.00096,
+    "std_value": 0.001731,
+    "best_value": 0.004287,
+    "worst_value": -0.001639
+  },
+  "ai_insights": "1. **KEY FINDINGS**:\n   - The most significant negative correlations are observed between parameters related to risk management (e.g., `volatility_penalty`, `max_drawdown_penalty`) and performance metrics, indicating that overly aggressive penalties for volatility or drawdown can negatively impact model performance.\n   - Parameters like `base_target_step` and `eval_time_gap` also show strong negative correlations with performance, suggesting that these parameters may need to be tuned more carefully.\n   - The parameter `norm_action` has a relatively low correlation with performance but falls within a narrower sweet spot range compared to other parameters. This suggests it might be an important parameter to fine-tune.\n\n2. **OVERLOOKED OPPORTUNITIES**:\n   - There are no explicitly listed \"overlooked_trials\" in the data provided, so based on this information alone, there is no indication of high-performing configurations that should be reconsidered. However, given the strong negative correlations with performance metrics, it would be prudent to re-examine and possibly retrain models with these parameters set more optimally.\n\n3. **PARAMETER RECOMMENDATIONS**:\n   - For `volatility_penalty` and `max_drawdown_penalty`, focus on values between 0.005 and 0.01 for `volatility_penalty` and 0.015 to 0.03 for `max_drawdown_penalty`. These ranges are associated with the highest performance.\n   - For `base_target_step`, aim for a value around 147,456 (mean) as this is within the sweet spot range and correlates negatively with performance.\n   - For `eval_time_gap`, target values around 45 seconds, which falls within the mean of 45.0 and minimizes its negative correlation with performance.\n\n4. **INTERACTIONS TO EXPLORE**:\n   - The strong negative correlations between `volatility_penalty` and `base_target_step`, as well as `max_drawdown_penalty` and `base_target_step`, suggest that these parameters might interact negatively with each other. Exploring different combinations within their sweet spot ranges could reveal synergistic effects.\n   - Investigate the interaction between `norm_action` and `eval_time_gap`. Given their moderate negative correlation, it\u2019s worth exploring whether they can be tuned together to improve performance.\n\n5. **ACTIONABLE SUGGESTIONS**:\n   - **Parameter Tuning**: Conduct a grid search or random search within the identified sweet spot ranges for `volatility_penalty`, `max_drawdown_penalty`, and `base_target_step` to find optimal combinations.\n   - **Risk Management**: Since there is a strong negative correlation between risk management parameters and performance, consider implementing a more nuanced approach to risk management that balances volatility and drawdown penalties.\n   - **Performance Monitoring**: Implement real-time monitoring of model performance during training. This can help in identifying issues early and making adjustments before the model degrades significantly.\n\nBy focusing on these recommendations, future training runs can be optimized for better performance while minimizing risks associated with overly aggressive risk management strategies."
+}

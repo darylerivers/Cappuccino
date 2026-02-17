@@ -1,0 +1,45 @@
+URGENT: Speed up training from 11 days to 2-3 days
+
+CURRENT SITUATION:
+- Training takes 14.7 min/trial × 1000 trials = 10.2 days
+- GPU: AMD RX 7900 GRE (16GB VRAM), 100% utilized, using ~6GB/trial
+- Best Sharpe so far: 0.1720 (trial #14 after 12 trials)
+- File: scripts/training/1_optimize_unified.py
+- Database: databases/optuna_cappuccino.db
+- Study: cappuccino_ft_16gb_optimized
+
+PROBLEM: By the time training completes, model is outdated by 7+ days of crypto market data.
+
+YOUR TASK: Modify scripts/training/1_optimize_unified.py to train 3-4x faster.
+
+KEY OPTIMIZATIONS TO IMPLEMENT:
+
+1. ADD PRUNING (2-3x speedup)
+   - Use optuna.pruners.MedianPruner or HyperbandPruner
+   - Kill bad trials after ~30% of training
+   - Need to add trial.report() calls in training loop
+
+2. PARALLEL TRIALS (1.5-2x speedup)
+   - study.optimize(..., n_jobs=2)
+   - GPU has 16GB, using 6GB/trial, so 2 parallel trials should fit
+   - Verify no GPU OOM
+
+3. REDUCE TRIALS (2x speedup)
+   - Change from 1000 to 400-500 trials
+   - Use better sampler (TPESampler with multivariate=True)
+   - Use --use-best-ranges mode
+
+PROVIDE:
+1. Updated optuna.create_study() code with pruner
+2. Updated study.optimize() code with n_jobs
+3. Code to add trial.report() in training loop
+4. Estimated new training time
+5. Any risks/tradeoffs
+
+CONSTRAINTS:
+- Must keep model quality (Sharpe >= 0.15)
+- Must use FT-Transformer (--force-ft)
+- Must fit in 16GB GPU VRAM
+- Production-ready code only
+
+GOAL: 2-3 days training time, maintain Sharpe ~0.17+

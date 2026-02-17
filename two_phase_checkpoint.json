@@ -1,0 +1,25 @@
+{
+  "current_phase": "phase1",
+  "phase1_complete": true,
+  "phase2_complete": false,
+  "phase1_results": {
+    "timeframe": "7d",
+    "interval": "1h",
+    "best_trial_number": 58,
+    "best_value": 0.038055919016734906,
+    "best_params": {
+      "learning_rate": 1.633717471281998e-05,
+      "batch_size": 3072,
+      "gamma": 0.97,
+      "net_dimension": 1024,
+      "lookback": 4,
+      "trailing_stop_pct": 0.15
+    },
+    "best_sharpe_bot": 0.04882868622300613,
+    "best_sharpe_hodl": 0.0006692647070113575,
+    "n_trials": 60,
+    "phase1_duration": 9928.12115597725
+  },
+  "phase2_results": null,
+  "timestamp": "2025-12-17T00:01:25.977086"
+}

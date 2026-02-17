@@ -1,0 +1,29 @@
+[
+  {
+    "rationale": "Higher gamma and batch size often lead to better performance by giving more weight to future rewards and exploring larger action spaces.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1536,
+    "max_grad_norm": 1.5,
+    "value_loss_coef": 0.7
+  },
+  {
+    "rationale": "Exploiting the top performers' clusters by increasing the net dimension and reducing the learning rate.",
+    "learning_rate": 5e-05,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "net_dimension": 1792,
+    "max_grad_norm": 2.0,
+    "value_loss_coef": 0.6
+  },
+  {
+    "rationale": "Exploring new regions by decreasing the learning rate and gamma, while maintaining a high net dimension.",
+    "learning_rate": 1e-05,
+    "batch_size": 128,
+    "gamma": 0.97,
+    "net_dimension": 2048,
+    "max_grad_norm": 1.0,
+    "value_loss_coef": 0.5
+  }
+]

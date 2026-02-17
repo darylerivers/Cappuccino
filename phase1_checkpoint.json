@@ -1,0 +1,41 @@
+{
+  "results": [
+    {
+      "timeframe": "5d",
+      "interval": "1h",
+      "best_trial_number": 208,
+      "best_value": 0.004220360611789344,
+      "best_params": {
+        "learning_rate": 2.3751201570907674e-05,
+        "batch_size": 3072,
+        "gamma": 0.98,
+        "net_dimension": 1152,
+        "lookback": 5,
+        "trailing_stop_pct": 0.1
+      },
+      "best_sharpe_bot": 0.017921671348072436,
+      "best_sharpe_hodl": 0.0006692647070113575,
+      "n_trials": 211
+    },
+    {
+      "timeframe": "7d",
+      "interval": "1h",
+      "best_trial_number": 75,
+      "best_value": 0.038391200388016744,
+      "best_params": {
+        "learning_rate": 1.7284671506103038e-05,
+        "batch_size": 3072,
+        "gamma": 0.95,
+        "net_dimension": 1408,
+        "lookback": 4,
+        "trailing_stop_pct": 0.15
+      },
+      "best_sharpe_bot": 0.049369291074734534,
+      "best_sharpe_hodl": 0.0006692647070113575,
+      "n_trials": 80
+    }
+  ],
+  "completed_combinations": 2,
+  "total_combinations": 2,
+  "timestamp": "2025-12-17T13:57:54.707689"
+}

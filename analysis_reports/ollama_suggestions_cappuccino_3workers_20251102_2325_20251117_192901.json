@@ -1,0 +1,29 @@
+[
+  {
+    "rationale": "Explores a higher learning rate around the top performer's range and increases batch size to capture more data.",
+    "learning_rate": 0.001,
+    "batch_size": 256,
+    "gamma": 0.99,
+    "net_dimension": 1536,
+    "ppo_epochs": 10,
+    "thread_num": 12
+  },
+  {
+    "rationale": "Decreases the network dimension to reduce complexity and increases the number of epochs for more thorough training.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.98,
+    "net_dimension": 1024,
+    "ppo_epochs": 12,
+    "thread_num": 14
+  },
+  {
+    "rationale": "Tries a smaller batch size and lower learning rate to focus on stability and exploration.",
+    "learning_rate": 5e-05,
+    "batch_size": 128,
+    "gamma": 0.97,
+    "net_dimension": 896,
+    "ppo_epochs": 8,
+    "thread_num": 11
+  }
+]

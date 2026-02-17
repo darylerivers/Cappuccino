@@ -1,0 +1,201 @@
+{
+  "timestamp": "2025-12-07T08:32:35.992499",
+  "total_trials_analyzed": 9180,
+  "archived_trials": 3461,
+  "current_ensemble_size": 20,
+  "correlations": {
+    "norm_tech_exp": -0.3478,
+    "min_cash_reserve": -0.319,
+    "gamma": 0.2705,
+    "norm_action": 0.2623,
+    "volatility_penalty": -0.2593,
+    "concentration_penalty": 0.2002,
+    "learning_rate": -0.1975,
+    "lookback": 0.1808,
+    "norm_reward_exp": -0.1765,
+    "thread_num": 0.1631,
+    "net_dimension": 0.1593,
+    "worker_num": 0.1388,
+    "kl_target": -0.1284,
+    "batch_size": -0.1221,
+    "gae_lambda": 0.1215,
+    "clip_range": 0.1145,
+    "eval_time_gap": 0.1061,
+    "lr_schedule_type": 0.0912,
+    "time_decay_floor": 0.0747,
+    "lr_schedule_factor": -0.0669,
+    "max_grad_norm": 0.0659,
+    "ppo_epochs": 0.0639,
+    "base_break_step": 0.0603,
+    "base_target_step": 0.0522,
+    "value_loss_coef": -0.0424,
+    "use_lr_schedule": -0.041,
+    "norm_cash_exp": -0.0346,
+    "adam_epsilon": -0.0314,
+    "norm_stocks_exp": 0.0284,
+    "trailing_stop_pct": -0.0171,
+    "entropy_coef": -0.0153,
+    "max_drawdown_penalty": -0.0071
+  },
+  "parameter_sweet_spots": {
+    "norm_tech_exp": {
+      "mean": -15.257081,
+      "std": 0.69374,
+      "min": -18.0,
+      "max": -15.0
+    },
+    "min_cash_reserve": {
+      "mean": 0.079281,
+      "std": 0.043871,
+      "min": 0.03,
+      "max": 0.25
+    },
+    "gamma": {
+      "mean": 0.980556,
+      "std": 0.01176,
+      "min": 0.89,
+      "max": 0.99
+    },
+    "norm_action": {
+      "mean": 23146.514161,
+      "std": 2925.006659,
+      "min": 9000.0,
+      "max": 25000.0
+    },
+    "volatility_penalty": {
+      "mean": 0.005777,
+      "std": 0.008718,
+      "min": 0.0,
+      "max": 0.04
+    }
+  },
+  "interactions": [
+    {
+      "params": [
+        "norm_tech_exp",
+        "min_cash_reserve"
+      ],
+      "correlation": 0.274
+    },
+    {
+      "params": [
+        "norm_tech_exp",
+        "gamma"
+      ],
+      "correlation": -0.3837
+    },
+    {
+      "params": [
+        "norm_tech_exp",
+        "norm_action"
+      ],
+      "correlation": -0.3266
+    },
+    {
+      "params": [
+        "min_cash_reserve",
+        "gamma"
+      ],
+      "correlation": -0.3136
+    },
+    {
+      "params": [
+        "min_cash_reserve",
+        "norm_action"
+      ],
+      "correlation": -0.1375
+    },
+    {
+      "params": [
+        "gamma",
+        "norm_action"
+      ],
+      "correlation": 0.2729
+    }
+  ],
+  "top_performers": {
+    "count": 20,
+    "mean_value": 0.143452,
+    "trial_numbers": [
+      191,
+      192,
+      26,
+      83,
+      25,
+      157,
+      156,
+      87,
+      86,
+      195,
+      172,
+      179,
+      177,
+      173,
+      194,
+      178,
+      166,
+      180,
+      144,
+      190
+    ]
+  },
+  "overlooked_trials": [
+    {
+      "trial_number": 191,
+      "value": 0.156558,
+      "rank_overall": 1
+    },
+    {
+      "trial_number": 192,
+      "value": 0.156517,
+      "rank_overall": 2
+    },
+    {
+      "trial_number": 26,
+      "value": 0.156289,
+      "rank_overall": 3
+    },
+    {
+      "trial_number": 25,
+      "value": 0.155465,
+      "rank_overall": 5
+    },
+    {
+      "trial_number": 157,
+      "value": 0.155207,
+      "rank_overall": 6
+    },
+    {
+      "trial_number": 156,
+      "value": 0.15513,
+      "rank_overall": 7
+    },
+    {
+      "trial_number": 195,
+      "value": 0.133606,
+      "rank_overall": 10
+    },
+    {
+      "trial_number": 172,
+      "value": 0.133569,
+      "rank_overall": 11
+    },
+    {
+      "trial_number": 179,
+      "value": 0.133528,
+      "rank_overall": 12
+    },
+    {
+      "trial_number": 177,
+      "value": 0.133518,
+      "rank_overall": 13
+    }
+  ],
+  "statistics": {
+    "mean_value": 0.025633,
+    "std_value": 0.033392,
+    "best_value": 0.156558,
+    "worst_value": -0.116391
+  },
+  "ai_insights": "### KEY FINDINGS:\n1. **High Correlations**: Several parameters show significant correlations with the trial value, indicating that they have a substantial impact on performance.\n2. **Parameter Sweet Spots**: Certain parameter ranges consistently yield better results, suggesting optimal operating conditions for the model.\n3. **Outliers and High-Performing Trials**: A few trials stand out as significantly higher performers than the average, despite being archived.\n\n### OVERLOOKED OPPORTUNITIES:\n1. **High-Performing Configurations**: The top-performing trials (trial numbers 191, 192, etc.) have values much higher than the mean and standard deviation of the dataset. These should be reconsidered as they might contain valuable insights or anomalies.\n2. **Reevaluation of Overlooked Trials**: The \"overlooked_trials\" list contains several high-performing configurations (trial numbers 191, 192) that are not currently part of the ensemble. Re-evaluating these trials could lead to better performance.\n\n### PARAMETER RECOMMENDATIONS:\n1. **norm_tech_exp**: Focus on values between -18.0 and -15.0.\n2. **min_cash_reserve**: Aim for values between 0.03 and 0.25.\n3. **gamma**: Use values between 0.98 and 0.99.\n4. **norm_action**: Target values around 23,000 to 25,000.\n\n### INTERACTIONS TO EXPLORE:\n1. **norm_tech_exp and gamma**: Investigate how varying these two parameters together affects performance.\n2. **min_cash_reserve and gamma**: Explore the interaction between cash reserve and discount factor.\n3. **norm_action and gamma**: Study how action scaling interacts with the discount factor.\n\n### ACTIONABLE SUGGESTIONS:\n1. **Increase Ensemble Size**: Expand the ensemble to include more trials, particularly those from the \"overlooked_trials\" list that show high performance.\n2. **Fine-Tune Hyperparameters**: Conduct a hyperparameter tuning process focusing on the identified sweet spots and interactions (e.g., norm_tech_exp with gamma).\n3. **Monitor Performance Trends**: Continuously monitor the performance of new trials to identify any emerging trends or anomalies.\n\nBy following these recommendations, future training runs can be optimized for better performance and potentially uncover more valuable insights from archived data."
+}

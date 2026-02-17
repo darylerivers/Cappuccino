@@ -29,6 +29,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import operator as op
 from functools import reduce
+from constants import TRAINING, DATA
 
 
 def nCr(n, r):
@@ -51,22 +52,23 @@ trade_end_date = '2025-10-02 00:00:00'
 TRAIN_START_OVERRIDE = None
 VAL_START_OVERRIDE = None
 
-SEED_CFG = 2390408
+SEED_CFG = TRAINING.SEED  # Import from constants
 DATA_SOURCE = 'alpaca'  # Options: 'alpaca', 'binance', 'yahoo' (alpaca for training data)
-TIMEFRAME = '1h'  # 1h timeframe for better data quality and lower transaction costs
-H_TRIALS = 150
-KCV_groups = 5
-K_TEST_GROUPS = 2
-NUM_PATHS = 3  # Changed from 4 to 3 for 6 folds (faster, more training data per fold)
+TIMEFRAME = DATA.TIMEFRAME_DEFAULT  # Import from constants
+H_TRIALS = TRAINING.N_TRIALS  # Import from constants
+KCV_groups = TRAINING.KCV_GROUPS  # Import from constants
+K_TEST_GROUPS = TRAINING.K_TEST_GROUPS  # Import from constants
+NUM_PATHS = TRAINING.NUM_PATHS  # Import from constants
 N_GROUPS = NUM_PATHS + 1
 NUMBER_OF_SPLITS = nCr(N_GROUPS, N_GROUPS - K_TEST_GROUPS)
 # print(NUMBER_OF_SPLITS)  # Commented to reduce noise
 
 # Rolling windows tuned for intraday re-training flows
 # Increased windows to give agent more data for learning better strategies
-TRAIN_WINDOW_HOURS = 1440  # 60 days (was 30) - 2x more training data
-VAL_WINDOW_HOURS = 240      # 10 days (was 5) - 2x more validation data
+TRAIN_WINDOW_HOURS = TRAINING.TRAIN_WINDOW_HOURS  # Import from constants
+VAL_WINDOW_HOURS = TRAINING.VAL_WINDOW_HOURS  # Import from constants
 
+# Paper trading history (kept in config_main for backward compatibility)
 PAPER_TRADING_HISTORY_HOURS_MIN = 24
 PAPER_TRADING_HISTORY_HOURS_MAX = 120
 PAPER_TRADING_HISTORY_HOURS_DEFAULT = 120
@@ -103,49 +105,13 @@ COINBASE_WEBSOCKET_INCLUDE_OPEN_BUCKET = True
 #######################################################################################################
 TRAINVAL_USE_TRADE_RANGE = False
 
-print(NUMBER_OF_SPLITS)
-
 no_candles_for_train = _candles_from_hours(TRAIN_WINDOW_HOURS, TIMEFRAME)
 no_candles_for_val = _candles_from_hours(VAL_WINDOW_HOURS, TIMEFRAME)
 
-TICKER_LIST = ['AAVE/USD',
-               'AVAX/USD',
-               'BTC/USD',
-               'LINK/USD',
-               'ETH/USD',
-               'LTC/USD',
-               #'MATIC/USD',  # Not available on Alpaca
-               'UNI/USD',
-               #'SOL/USD',    # Not available on Alpaca
-               ]
-
-
-# Minimum buy limits (adjusted for Coinbase $1 minimum order)
-ALPACA_LIMITS = np.array([0.005,    # AAVE (~$1.00 at $200/AAVE)
-                          0.03,     # AVAX (~$1.00 at $35/AVAX)
-                          0.00001,  # BTC (~$1.10 at $110k/BTC)
-                          0.1,      # LINK (~$1.00 at $10/LINK)
-                          0.0003,   # ETH (~$1.20 at $4k/ETH)
-                          0.01,     # LTC (~$0.95 at $95/LTC)
-                          0.2,      # MATIC (~$1.00 at $0.50/MATIC)
-                          0.15,     # UNI (~$1.00 at $7/UNI)
-                          0.006,    # SOL (~$1.00 at $170/SOL)
-                          0.01      # Placeholder for future tickers
-                          ])
-
-
-TECHNICAL_INDICATORS_LIST = ['open',
-                             'high',
-                             'low',
-                             'close',
-                             'volume',
-                             'macd',
-                             'macd_signal',
-                             'macd_hist',
-                             'rsi',
-                             'cci',
-                             'dx'
-                             ]
+# Import data constants (canonical source of truth)
+TICKER_LIST = list(DATA.DEFAULT_TICKERS)
+ALPACA_LIMITS = np.array(DATA.ALPACA_LIMITS)
+TECHNICAL_INDICATORS_LIST = list(DATA.TECH_INDICATORS)
 
 
 # Auto compute all necessary dates based on candle distribution

@@ -1,0 +1,26 @@
+{
+  "stages": {
+    "backtest": {
+      "enabled": true,
+      "max_attempts": 3,
+      "timeout": 60
+    },
+    "cge_stress": {
+      "enabled": false,
+      "max_attempts": 2,
+      "timeout": 300
+    },
+    "deploy": {
+      "enabled": true,
+      "max_attempts": 1,
+      "auto_restart": true
+    }
+  },
+  "daemon": {
+    "check_interval": 300,
+    "health_check_interval": 60
+  },
+  "retry": {
+    "delays": [5, 30, 300]
+  }
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "rationale": "Explores a lower learning rate, near the best performers' range.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "max_grad_norm": 1.0,
+    "net_dimension": 1280,
+    "norm_action": 23000,
+    "ppo_epochs": 10,
+    "thread_num": 12,
+    "time_decay_floor": 0.25
+  },
+  {
+    "rationale": "Explores a higher net dimension, near the best performers' range.",
+    "learning_rate": 5e-05,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "max_grad_norm": 1.5,
+    "net_dimension": 2048,
+    "norm_action": 23500,
+    "ppo_epochs": 12,
+    "thread_num": 13,
+    "time_decay_floor": 0.2
+  },
+  {
+    "rationale": "Explores a lower gamma, which might increase exploration.",
+    "learning_rate": 5e-05,
+    "batch_size": 512,
+    "gamma": 0.97,
+    "max_grad_norm": 0.8,
+    "net_dimension": 1024,
+    "norm_action": 23000,
+    "ppo_epochs": 16,
+    "thread_num": 11,
+    "time_decay_floor": 0.2
+  }
+]

@@ -1,0 +1,137 @@
+{
+  "arena_name": "arena_cappuccino_alpaca_v2",
+  "study_name": "cappuccino_alpaca_v2",
+  "model_count": 10,
+  "models": [
+    {
+      "model_id": 0,
+      "trial_number": 191,
+      "trial_id": 686,
+      "sharpe_value": 0.15655763151328597,
+      "model_path": "train_results/cwd_tests/trial_191_1h",
+      "validation_status": {
+        "all_valid": true,
+        "files_exist": true,
+        "best_trial_valid": true,
+        "sharpe_matches": true
+      }
+    },
+    {
+      "model_id": 1,
+      "trial_number": 192,
+      "trial_id": 687,
+      "sharpe_value": 0.15651673943946423,
+      "model_path": "train_results/cwd_tests/trial_192_1h",
+      "validation_status": {
+        "all_valid": true,
+        "files_exist": true,
+        "best_trial_valid": true,
+        "sharpe_matches": true
+      }
+    },
+    {
+      "model_id": 2,
+      "trial_number": 26,
+      "trial_id": 521,
+      "sharpe_value": 0.15628904516158829,
+      "model_path": "train_results/cwd_tests/trial_26_1h",
+      "validation_status": {
+        "all_valid": true,
+        "files_exist": true,
+        "best_trial_valid": true,
+        "sharpe_matches": true
+      }
+    },
+    {
+      "model_id": 3,
+      "trial_number": 83,
+      "trial_id": 578,
+      "sharpe_value": 0.15577367482432586,
+      "model_path": "train_results/cwd_tests/trial_83_1h",
+      "validation_status": {
+        "all_valid": true,
+        "files_exist": true,
+        "best_trial_valid": true,
+        "sharpe_matches": true
+      }
+    },
+    {
+      "model_id": 4,
+      "trial_number": 25,
+      "trial_id": 520,
+      "sharpe_value": 0.15546472968613867,
+      "model_path": "train_results/cwd_tests/trial_25_1h",
+      "validation_status": {
+        "all_valid": true,
+        "files_exist": true,
+        "best_trial_valid": true,
+        "sharpe_matches": true
+      }
+    },
+    {
+      "model_id": 5,
+      "trial_number": 157,
+      "trial_id": 652,
+      "sharpe_value": 0.15520737498534248,
+      "model_path": "train_results/cwd_tests/trial_157_1h",
+      "validation_status": {
+        "all_valid": true,
+        "files_exist": true,
+        "best_trial_valid": true,
+        "sharpe_matches": true
+      }
+    },
+    {
+      "model_id": 6,
+      "trial_number": 156,
+      "trial_id": 651,
+      "sharpe_value": 0.1551295250071367,
+      "model_path": "train_results/cwd_tests/trial_156_1h",
+      "validation_status": {
+        "all_valid": true,
+        "files_exist": true,
+        "best_trial_valid": true,
+        "sharpe_matches": true
+      }
+    },
+    {
+      "model_id": 7,
+      "trial_number": 87,
+      "trial_id": 582,
+      "sharpe_value": 0.1548767632181858,
+      "model_path": "train_results/cwd_tests/trial_87_1h",
+      "validation_status": {
+        "all_valid": true,
+        "files_exist": true,
+        "best_trial_valid": true,
+        "sharpe_matches": true
+      }
+    },
+    {
+      "model_id": 8,
+      "trial_number": 86,
+      "trial_id": 581,
+      "sharpe_value": 0.15459163229928605,
+      "model_path": "train_results/cwd_tests/trial_86_1h",
+      "validation_status": {
+        "all_valid": true,
+        "files_exist": true,
+        "best_trial_valid": true,
+        "sharpe_matches": true
+      }
+    },
+    {
+      "model_id": 9,
+      "trial_number": 195,
+      "trial_id": 690,
+      "sharpe_value": 0.13360649001174027,
+      "model_path": "train_results/cwd_tests/trial_195_1h",
+      "validation_status": {
+        "all_valid": true,
+        "files_exist": true,
+        "best_trial_valid": true,
+        "sharpe_matches": true
+      }
+    }
+  ]
+}

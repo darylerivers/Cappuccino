@@ -1,0 +1,28 @@
+{
+  "last_check_time": "2026-02-11T02:48:00.449535+00:00",
+  "last_bar_count": 22,
+  "last_sharpe": -10.738326240288794,
+  "warning_sent": true,
+  "critical_sent": true,
+  "emergency_start_time": "2026-02-10T03:32:15.773296+00:00",
+  "alert_history": [
+    {
+      "timestamp": "2026-02-09T06:32:15.151692+00:00",
+      "level": "critical",
+      "live_sharpe": -5.394337883598988,
+      "message": "\ud83d\udd34 CRITICAL: Live Sharpe -5.39 < -1.0! Model severely degraded."
+    },
+    {
+      "timestamp": "2026-02-09T19:32:15.693971+00:00",
+      "level": "warning",
+      "live_sharpe": -0.678206097007138,
+      "message": "\u26a0\ufe0f  WARNING: Live Sharpe -0.68 vs Backtest 0.18 (gap: -0.86)"
+    },
+    {
+      "timestamp": "2026-02-11T03:48:00.905777+00:00",
+      "level": "emergency",
+      "live_sharpe": -10.738326240288794,
+      "message": "\ud83d\udea8 EMERGENCY: Live Sharpe -10.74 < -2.0 for 24.3h! Auto-stopping trading."
+    }
+  ]
+}

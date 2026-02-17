@@ -66,7 +66,9 @@ class AgentPPO(AgentBase):
         done = False
         get_action = self.act.get_action
         get_a_to_e = self.act.get_a_to_e
-        while step_i < target_step or not done:
+        # Safety: convert done to boolean if it's a tensor
+        done_val = done.item() if isinstance(done, torch.Tensor) else done
+        while step_i < target_step or not done_val:
             ten_s = torch.as_tensor(state, dtype=torch.float32).unsqueeze(0)
             ten_a, ten_n = [
                 ten.cpu() for ten in get_action(ten_s.to(self.device))
@@ -76,7 +78,9 @@ class AgentPPO(AgentBase):
             traj_list.append((ten_s, reward, done, ten_a, ten_n))  # different
 
             step_i += 1
-            state = env.reset() if done else next_s
+            # Safety: handle tensor done values
+            done_val = done.item() if isinstance(done, torch.Tensor) else done
+            state = env.reset() if done_val else next_s
         self.states[0] = state
         last_done[0] = step_i
         return self.convert_trajectory(traj_list, last_done)  # traj_list
@@ -97,7 +101,7 @@ class AgentPPO(AgentBase):
         ten_dones = torch.zeros(self.env_num, dtype=torch.int, device=self.device)
         get_action = self.act.get_action
         get_a_to_e = self.act.get_a_to_e
-        while step_i < target_step or not any(ten_dones):
+        while step_i < target_step or not ten_dones.any():
             ten_a, ten_n = get_action(ten_s)  # different
             ten_s_next, ten_rewards, ten_dones, _ = env.step(get_a_to_e(ten_a))
 

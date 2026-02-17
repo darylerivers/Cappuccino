@@ -5,7 +5,7 @@ some external functions."""
 
 import optuna
 import joblib
-from function_finance_metrics import *
+from utils.function_finance_metrics import *
 import os
 import scipy.stats as stats
 

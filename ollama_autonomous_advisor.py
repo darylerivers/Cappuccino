@@ -10,8 +10,8 @@ This daemon continuously:
 5. Learns from results and improves
 
 Usage:
-    python ollama_autonomous_advisor.py --study cappuccino_3workers_20251102_2325
-    python ollama_autonomous_advisor.py --study cappuccino_3workers_20251102_2325 --daemon
+    python ollama_autonomous_advisor.py --study cappuccino_1year_20251121
+    python ollama_autonomous_advisor.py --study cappuccino_1year_20251121 --daemon
 """
 
 import argparse
@@ -42,6 +42,8 @@ class AdvisorState:
     tested_configs: List[Dict]
     best_discovered_value: float
     is_running: bool
+    last_archive_analysis: datetime = None
+    archive_insights_count: int = 0
 
 
 class AutonomousAdvisor:
@@ -87,6 +89,7 @@ class AutonomousAdvisor:
         if self.state_file.exists():
             with self.state_file.open("r") as f:
                 data = json.load(f)
+                last_archive = data.get("last_archive_analysis")
                 return AdvisorState(
                     study_name=data["study_name"],
                     last_trial_count=data["last_trial_count"],
@@ -95,6 +98,8 @@ class AutonomousAdvisor:
                     tested_configs=data["tested_configs"],
                     best_discovered_value=data["best_discovered_value"],
                     is_running=False,  # Always reset on restart
+                    last_archive_analysis=datetime.fromisoformat(last_archive) if last_archive else None,
+                    archive_insights_count=data.get("archive_insights_count", 0),
                 )
         else:
             return AdvisorState(
@@ -105,6 +110,8 @@ class AutonomousAdvisor:
                 tested_configs=[],
                 best_discovered_value=float('-inf'),
                 is_running=False,
+                last_archive_analysis=None,
+                archive_insights_count=0,
             )
 
     def _save_state(self):
@@ -117,6 +124,8 @@ class AutonomousAdvisor:
             "tested_configs": self.state.tested_configs,
             "best_discovered_value": self.state.best_discovered_value,
             "is_running": self.state.is_running,
+            "last_archive_analysis": self.state.last_archive_analysis.isoformat() if self.state.last_archive_analysis else None,
+            "archive_insights_count": self.state.archive_insights_count,
         }
         with self.state_file.open("w") as f:
             json.dump(data, f, indent=2)
@@ -365,10 +374,64 @@ class AutonomousAdvisor:
 
         return None
 
+    def run_archive_analysis(self) -> bool:
+        """Run AI analysis on archived trials to find overlooked patterns."""
+        self._log("Running archive analysis for historical insights...")
+
+        try:
+            # Check if archive_analyzer exists
+            if not Path("archive_analyzer.py").exists():
+                self._log("archive_analyzer.py not found, skipping", "WARNING")
+                return False
+
+            # Run the archive analyzer
+            cmd = [
+                "python", "archive_analyzer.py",
+                "--analyze",
+                "--model", self.ollama_model,
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+
+            if result.returncode == 0:
+                self._log("✓ Archive analysis completed successfully")
+                self.state.archive_insights_count += 1
+                self.state.last_archive_analysis = datetime.now()
+
+                # Log key findings from the output
+                output = result.stdout
+                if "OVERLOOKED HIGH-PERFORMERS" in output:
+                    self._log("Found overlooked high-performers in archived data")
+
+                return True
+            else:
+                self._log(f"Archive analysis failed: {result.stderr}", "ERROR")
+                return False
+
+        except subprocess.TimeoutExpired:
+            self._log("Archive analysis timed out", "WARNING")
+            return False
+        except Exception as e:
+            self._log(f"Error running archive analysis: {e}", "ERROR")
+            return False
+
+    def _should_run_archive_analysis(self) -> bool:
+        """Check if it's time to run archive analysis (daily)."""
+        if self.state.last_archive_analysis is None:
+            return True
+
+        hours_since_last = (datetime.now() - self.state.last_archive_analysis).total_seconds() / 3600
+        return hours_since_last >= 24  # Run once per day
+
     def autonomous_cycle(self):
         """Run one cycle of the autonomous advisor."""
         # Check disk space first
         self._check_disk_space()
+
+        # Run daily archive analysis if due
+        if self._should_run_archive_analysis():
+            self._log("Daily archive analysis is due...")
+            self.run_archive_analysis()
+            self._save_state()
 
         # Check current trial count
         current_trials = self._get_trial_count()
@@ -466,6 +529,7 @@ class AutonomousAdvisor:
             self._log("="*80)
             self._log("AUTONOMOUS AI ADVISOR STOPPED")
             self._log(f"Total analyses: {self.state.analysis_count}")
+            self._log(f"Archive insights: {self.state.archive_insights_count}")
             self._log(f"Configs tested: {len(self.state.tested_configs)}")
             self._log(f"Best discovered: {self.state.best_discovered_value:.6f}")
             self._log("="*80)

@@ -1,78 +1,85 @@
-# Quick Start Guide
+# Quick Start - Organized Cappuccino
 
-## Start Training (One Command)
+## 📍 You Are Here
+Your files are now organized! Everything is in logical folders.
 
+## 🎯 Common Tasks
+
+### Check Training Status
 ```bash
-cd /home/mrc/experiment/cappuccino
-python -u 1_optimize_unified.py --n-trials 100 --gpu 0 --study-name production_run
+./monitoring/check_status.sh
 ```
 
-## Monitor GPU
-
+### Monitor Training (Live)
 ```bash
-watch -n 2 nvidia-smi
+./monitoring/monitor_training.sh
+tail -f logs/training/training_14indicators_*.log
 ```
 
-Expected: **60-90% GPU utilization**
-
-## Check Progress
-
+### Download New Data
 ```bash
-# Count completed trials
-sqlite3 databases/optuna_cappuccino.db "SELECT COUNT(*) FROM trials WHERE state='COMPLETE'"
-
-# View best trial
-sqlite3 databases/optuna_cappuccino.db "SELECT number, value FROM trials WHERE state='COMPLETE' ORDER BY value DESC LIMIT 1"
+python scripts/data/0_dl_trainval_data.py
 ```
 
-## Important Notes
-
-- ✅ Always use `python -u` for unbuffered output
-- ✅ Training will run in background
-- ✅ Each trial takes ~10-20 minutes (6 splits)
-- ✅ 100 trials = ~20-30 hours total
-- ✅ Safe to Ctrl+C and resume (Optuna persists state)
-
-## Resume Training
-
-If interrupted, just run the same command again:
+### Start Training
 ```bash
-python -u 1_optimize_unified.py --n-trials 100 --gpu 0 --study-name production_run
+python scripts/training/1_optimize_unified.py
+# or automated:
+./scripts/automation/start_training.sh
 ```
 
-Optuna automatically continues from where it left off.
-
-## View Results
-
-```python
-import optuna
-
-study = optuna.load_study(
-    study_name="production_run",
-    storage="sqlite:///databases/optuna_cappuccino.db"
-)
-
-print(f"Best value: {study.best_value}")
-print(f"Best params: {study.best_params}")
-print(f"Completed trials: {len([t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE])}")
-```
-
-## Troubleshooting
-
-**Problem:** Training seems slow
-**Solution:** Check GPU utilization with `nvidia-smi`. Should be 60-90%.
-
-**Problem:** No output visible
-**Solution:** Make sure to use `python -u` flag for unbuffered output.
-
-**Problem:** Out of memory
-**Solution:** Reduce `--n-trials` or lower batch size in code.
-
-## Next: Analyze Results
-
-After training completes:
+### Deploy Model
 ```bash
-python analyze_training.py --study-name production_run
+python scripts/deployment/auto_model_deployer.py
 ```
 
-This will show you the best hyperparameters and generate visualizations.
+### Check Paper Trader
+```bash
+python monitoring/show_current_trading_status.py
+```
+
+## 📂 Where Is Everything?
+
+### Scripts
+- **Training**: `scripts/training/`
+- **Data**: `scripts/data/`
+- **Deployment**: `scripts/deployment/`
+- **Automation**: `scripts/automation/`
+
+### Logs
+- **Training**: `logs/training/`
+- **System**: `logs/system/`
+
+### Documentation
+- **All guides**: `docs/guides/`
+- **Status**: `TRAINING_STATUS_14INDICATORS.md`
+- **Structure**: `DIRECTORY_STRUCTURE.md`
+
+### Key Files
+- **Config**: `config_main.py` (root)
+- **Processor**: `processors/processor_Alpaca.py`
+- **Monitor**: `monitoring/check_status.sh`
+
+## 🔍 Troubleshooting
+
+### Training Issues
+1. Check: `logs/training/*.log`
+2. Config: `config_main.py`
+3. Monitor: `./monitoring/monitor_training.sh`
+
+### Data Issues
+1. Script: `scripts/data/0_dl_trainval_data.py`
+2. Processor: `processors/processor_Alpaca.py`
+3. Check: `data/1h_1680/`
+
+### Deployment Issues
+1. Script: `scripts/deployment/auto_model_deployer.py`
+2. Logs: `logs/system/*.log`
+3. Status: `./monitoring/check_status.sh`
+
+## 📖 Full Documentation
+See: `DIRECTORY_STRUCTURE.md` for complete file organization guide.
+
+---
+**Organization Date**: 2026-02-05
+**Files Organized**: 2,813 files across 30+ folders

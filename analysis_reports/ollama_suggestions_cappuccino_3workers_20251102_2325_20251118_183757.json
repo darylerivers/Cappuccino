@@ -1,0 +1,29 @@
+[
+  {
+    "rationale": "Explores a higher learning rate near the best performer and slightly increases batch size to improve generalization.",
+    "learning_rate": 0.001,
+    "batch_size": 1024,
+    "gamma": 0.98,
+    "net_dimension": 2048,
+    "max_drawdown_penalty": 0.1,
+    "value_loss_coef": 0.75
+  },
+  {
+    "rationale": "Explores a lower learning rate and batch size to encourage more exploration in the model's behavior.",
+    "learning_rate": 5e-05,
+    "batch_size": 256,
+    "gamma": 0.97,
+    "net_dimension": 1024,
+    "max_drawdown_penalty": 0.05,
+    "value_loss_coef": 0.5
+  },
+  {
+    "rationale": "Tweaks some parameters around the mean values to explore a new region of hyperparameter space.",
+    "learning_rate": 0.00015,
+    "batch_size": 768,
+    "gamma": 0.995,
+    "net_dimension": 1536,
+    "max_drawdown_penalty": 0.075,
+    "value_loss_coef": 0.6
+  }
+]

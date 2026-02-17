@@ -1,0 +1,34 @@
+[Unit]
+Description=Cappuccino Training Worker Watchdog
+Documentation=file:///opt/user-data/experiment/cappuccino/MEMORY_SAFETY_SYSTEM.md
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=mrc
+Group=mrc
+WorkingDirectory=/opt/user-data/experiment/cappuccino
+ExecStart=/bin/bash /opt/user-data/experiment/cappuccino/worker_watchdog.sh
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=append:/opt/user-data/experiment/cappuccino/logs/watchdog_service.log
+StandardError=append:/opt/user-data/experiment/cappuccino/logs/watchdog_service_error.log
+
+# Resource limits
+Nice=10
+CPUQuota=10%
+MemoryMax=500M
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Environment
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target

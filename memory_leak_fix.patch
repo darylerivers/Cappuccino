@@ -1,0 +1,16 @@
+--- a/train/replay_buffer.py
++++ b/train/replay_buffer.py
+@@ -170,8 +170,13 @@ class ReplayBufferList(list):  # for on-policy
+         # Keep tensors on GPU if pin_to_gpu is enabled
+         if self.pin_to_gpu:
+             self[:] = [torch.cat(item, dim=0).to(self.device) for item in cur_items]
++            # Explicitly free old tensors
++            torch.cuda.empty_cache() if torch.cuda.is_available() else None
+         else:
+             self[:] = [torch.cat(item, dim=0) for item in cur_items]
++            # Force garbage collection for CPU tensors
++            import gc
++            gc.collect()
+         
+         steps = self[1].shape[0]
+         r_exp = self[1].mean().item()

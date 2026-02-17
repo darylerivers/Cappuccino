@@ -45,7 +45,31 @@ class Evaluator:  # [ElegantRL.2022.01.01]
                 get_episode_return_and_step(self.eval_env, act)
                 for _ in range(self.eval_times1)
             ]
-            rewards_steps_ary = np.array(rewards_steps_list, dtype=np.float32)
+            # Convert tuples to list of [reward, step] ensuring all are Python floats
+            rewards_steps_cpu = []
+            for item in rewards_steps_list:
+                # get_episode_return_and_step returns (episode_return, episode_step)
+                # Ensure both elements are Python floats
+                if isinstance(item, (list, tuple)) and len(item) == 2:
+                    r, s = item
+                    # Convert tensors to floats (handle both single and multi-element tensors)
+                    if isinstance(r, torch.Tensor):
+                        r_val = float(r.mean() if r.numel() > 1 else r.item())
+                    else:
+                        r_val = float(r)
+
+                    if isinstance(s, torch.Tensor):
+                        s_val = float(s.mean() if s.numel() > 1 else s.item())
+                    else:
+                        s_val = float(s)
+
+                    rewards_steps_cpu.append([r_val, s_val])
+                else:
+                    # Unexpected format - log and skip
+                    print(f"Warning: Unexpected format in rewards_steps_list: {type(item)}, {item}")
+                    continue
+
+            rewards_steps_ary = np.array(rewards_steps_cpu, dtype=np.float32)
 
             r_avg, s_avg = rewards_steps_ary.mean(
                 axis=0
@@ -53,13 +77,30 @@ class Evaluator:  # [ElegantRL.2022.01.01]
 
             """evaluate second time"""
             if r_avg > self.r_max:
-                rewards_steps_list.extend(
-                    [
-                        get_episode_return_and_step(self.eval_env, act)
-                        for _ in range(self.eval_times2)
-                    ]
-                )
-                rewards_steps_ary = np.array(rewards_steps_list, dtype=np.float32)
+                # Get additional evaluations
+                additional_evals = [
+                    get_episode_return_and_step(self.eval_env, act)
+                    for _ in range(self.eval_times2)
+                ]
+                # Convert additional evals to CPU floats
+                for item in additional_evals:
+                    if isinstance(item, (list, tuple)) and len(item) == 2:
+                        r, s = item
+                        # Handle both single and multi-element tensors
+                        if isinstance(r, torch.Tensor):
+                            r_val = float(r.mean() if r.numel() > 1 else r.item())
+                        else:
+                            r_val = float(r)
+
+                        if isinstance(s, torch.Tensor):
+                            s_val = float(s.mean() if s.numel() > 1 else s.item())
+                        else:
+                            s_val = float(s)
+
+                        rewards_steps_cpu.append([r_val, s_val])
+
+                # Recreate array with all evaluations
+                rewards_steps_ary = np.array(rewards_steps_cpu, dtype=np.float32)
                 r_avg, s_avg = rewards_steps_ary.mean(
                     axis=0
                 )  # average of episode return and episode step
@@ -172,7 +213,13 @@ def get_episode_return_and_step(env, act) -> (float, int):  # [ElegantRL.2022.01
         )  # not need detach(), because using torch.no_grad() outside
         state, reward, done, _ = env.step(action)
         episode_return += reward
-        if done:
+        # Handle both scalar and tensor done values (vectorized envs return tensors)
+        if isinstance(done, torch.Tensor):
+            done_cpu = done.cpu() if done.is_cuda else done
+            done_val = done_cpu.any().item() if done_cpu.numel() > 1 else done_cpu.item()
+        else:
+            done_val = done
+        if done_val:
             break
     episode_return = getattr(env, "episode_return", episode_return)
     episode_step += 1

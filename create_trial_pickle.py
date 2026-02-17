@@ -1,120 +1,89 @@
 #!/usr/bin/env python3
-"""
-Create best_trial pickle file from database for paper trading.
+"""Create a properly picklable trial object for deployment."""
 
-This script reconstructs the trial object needed by paper_trader_alpaca_polling.py
-from the Optuna database.
-"""
-
-import argparse
 import pickle
 import sqlite3
+import sys
+import json
 from pathlib import Path
-from typing import Dict, Any
-
-import optuna
 
 
-def create_trial_pickle(trial_id: int, db_path: str, output_dir: Path) -> None:
-    """Create best_trial pickle file for a specific trial."""
+class DeploymentTrial:
+    """Picklable trial object for paper trader."""
+    def __init__(self, trial_data):
+        self.number = trial_data['number']
+        self.params = trial_data['params']
+        self.user_attrs = trial_data['user_attrs']
+        self.value = trial_data['sharpe']
 
-    # Load study
-    storage = optuna.storages.RDBStorage(f"sqlite:///{db_path}")
 
-    # Find the study that contains this trial
+def get_trial_from_optuna(db_path, study_name, trial_number):
+    """Load trial parameters from Optuna database."""
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT s.study_name
-        FROM studies s
-        JOIN trials t ON s.study_id = t.study_id
-        WHERE t.trial_id = ?
-    """, (trial_id,))
-
+    cursor.execute("SELECT study_id FROM studies WHERE study_name = ?", (study_name,))
     result = cursor.fetchone()
     if not result:
-        raise ValueError(f"Trial {trial_id} not found in database")
+        raise ValueError(f"Study '{study_name}' not found")
+    study_id = result[0]
 
-    study_name = result[0]
+    cursor.execute("""
+        SELECT t.trial_id, tv.value
+        FROM trials t
+        LEFT JOIN trial_values tv ON t.trial_id = tv.trial_id
+        WHERE t.study_id = ? AND t.number = ?
+    """, (study_id, trial_number))
+
+    trial_data = cursor.fetchone()
+    if not trial_data:
+        raise ValueError(f"Trial #{trial_number} not found")
+
+    trial_id, sharpe = trial_data
+
+    cursor.execute("SELECT param_name, param_value FROM trial_params WHERE trial_id = ?", (trial_id,))
+
+    params = {}
+    for name, value in cursor.fetchall():
+        if name in ['lookback', 'net_dimension', 'worker_num', 'thread_num', 'batch_size',
+                    'base_target_step', 'base_break_step', 'ppo_epochs', 'eval_time_gap']:
+            params[name] = int(value)
+        elif name in ['use_ft_encoder', 'ft_use_pretrained', 'ft_freeze_encoder', 'use_lr_schedule']:
+            params[name] = bool(int(value))
+        else:
+            params[name] = float(value)
+
+    cursor.execute("SELECT key, value_json FROM trial_user_attributes WHERE trial_id = ?", (trial_id,))
+
+    user_attrs = {}
+    for key, value_json in cursor.fetchall():
+        try:
+            user_attrs[key] = json.loads(value_json) if value_json else None
+        except:
+            user_attrs[key] = value_json
+
     conn.close()
 
-    print(f"Loading study: {study_name}")
-    study = optuna.load_study(study_name=study_name, storage=storage)
-
-    # Find the trial
-    trial = None
-    for t in study.trials:
-        if t.number == trial_id or t._trial_id == trial_id:
-            trial = t
-            break
-
-    if trial is None:
-        raise ValueError(f"Trial {trial_id} not found in study {study_name}")
-
-    print(f"Found trial #{trial.number}")
-    print(f"  Value: {trial.value}")
-    print(f"  Params: {len(trial.params)} parameters")
-    print(f"  State: {trial.state}")
-
-    # Add necessary user attributes if missing
-    if "name_folder" not in trial.user_attrs:
-        # Infer from output_dir
-        folder_name = output_dir.name.replace("_1h", "").replace("trial_", "")
-        trial.set_user_attr("name_folder", f"cwd_tests/{output_dir.name}")
-        print(f"  Added name_folder: cwd_tests/{output_dir.name}")
-
-    if "model_name" not in trial.user_attrs:
-        trial.set_user_attr("model_name", "ppo")
-        print(f"  Added model_name: ppo")
-
-    # Save to pickle
-    output_path = output_dir / "best_trial"
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    with output_path.open("wb") as f:
-        pickle.dump(trial, f)
-
-    print(f"✓ Created: {output_path}")
-
-    # Verify it can be loaded
-    with output_path.open("rb") as f:
-        loaded_trial = pickle.load(f)
-
-    print(f"✓ Verified: Trial #{loaded_trial.number} with value {loaded_trial.value}")
+    return {'trial_id': trial_id, 'number': trial_number, 'sharpe': sharpe, 'params': params, 'user_attrs': user_attrs}
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Create best_trial pickle file from Optuna database"
-    )
-    parser.add_argument(
-        "--trial-id",
-        type=int,
-        required=True,
-        help="Trial ID to export"
-    )
-    parser.add_argument(
-        "--db",
-        type=str,
-        default="databases/optuna_cappuccino.db",
-        help="Path to Optuna database"
-    )
-    parser.add_argument(
-        "--output-dir",
-        type=str,
-        required=True,
-        help="Output directory (e.g., train_results/cwd_tests/trial_3358_1h)"
-    )
+if __name__ == '__main__':
+    trial_num = 250
+    output_dir = Path('train_results/deployment_trial250_20260207_175728')
+    db_path = 'databases/optuna_cappuccino.db'
 
-    args = parser.parse_args()
+    print(f"Loading Trial #{trial_num}...")
+    trial_data = get_trial_from_optuna(db_path, 'cappuccino_ft_transformer', trial_num)
+    print(f"  Sharpe: {trial_data['sharpe']:.6f}")
 
-    create_trial_pickle(
-        trial_id=args.trial_id,
-        db_path=args.db,
-        output_dir=Path(args.output_dir)
-    )
+    trial_obj = DeploymentTrial(trial_data)
 
+    output_file = output_dir / 'best_trial'
+    with open(output_file, 'wb') as f:
+        pickle.dump(trial_obj, f)
 
-if __name__ == "__main__":
-    main()
+    print(f"✓ Saved to: {output_file}")
+
+    with open(output_file, 'rb') as f:
+        loaded = pickle.load(f)
+    print(f"✓ Verified: Trial #{loaded.number}, Sharpe {loaded.value:.6f}")

@@ -115,12 +115,17 @@ while true; do
 
     log "Starting paper trading (attempt #$attempt)..."
 
-    # Start paper trading
-    python -u paper_trader_alpaca_polling.py \
+    # Start paper trading with risk management AND profit protection
+    python -u scripts/deployment/paper_trader_alpaca_polling.py \
         --model-dir "$MODEL_DIR" \
         --tickers $TICKERS \
         --poll-interval $POLL_INTERVAL \
         --history-hours 24 \
+        --max-position-pct 0.30 \
+        --stop-loss-pct 0.10 \
+        --portfolio-trailing-stop-pct 0.015 \
+        --profit-take-threshold-pct 0.03 \
+        --profit-take-amount-pct 0.50 \
         > "$LOG_DIR/paper_trading_live.log" 2>&1 &
 
     TRADING_PID=$!

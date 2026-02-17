@@ -1,0 +1,26 @@
+[
+  {
+    "rationale": "This configuration balances learning rate and batch size near the top performers while exploring a slightly different gamma value.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1280,
+    "ppo_epochs": 10
+  },
+  {
+    "rationale": "This configuration is centered around the top performers in net_dimension and ppo_epochs while slightly varying other parameters.",
+    "learning_rate": 5e-05,
+    "batch_size": 768,
+    "gamma": 0.98,
+    "net_dimension": 1280,
+    "ppo_epochs": 12
+  },
+  {
+    "rationale": "This configuration is a moderate exploration of parameters around the top performers, focusing on lr_schedule_factor and time_decay_floor.",
+    "learning_rate": 5e-05,
+    "batch_size": 512,
+    "gamma": 0.98,
+    "lr_schedule_factor": 0.7,
+    "time_decay_floor": 0.2
+  }
+]

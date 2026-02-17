@@ -1,0 +1,7 @@
+{
+  "trial_number": 87,
+  "trial_id": 582,
+  "sharpe_value": 0.1548767632181858,
+  "source_dir": "train_results/cwd_tests/trial_87_1h",
+  "validation_passed": true
+}

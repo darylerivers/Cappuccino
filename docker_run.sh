@@ -33,7 +33,7 @@ case $choice in
     1)
         echo ""
         echo "${GREEN}Running standard CPCV optimization (100 trials)...${NC}"
-        docker-compose run --rm cappuccino-train python 1_optimize_unified.py \
+        docker-compose run --rm cappuccino-train python scripts/training/1_optimize_unified.py \
             --n-trials 100 \
             --gpu 0 \
             --study-name cappuccino_standard \
@@ -43,7 +43,7 @@ case $choice in
     2)
         echo ""
         echo "${GREEN}Running multi-timeframe optimization (150 trials)...${NC}"
-        docker-compose run --rm cappuccino-train python 1_optimize_unified.py \
+        docker-compose run --rm cappuccino-train python scripts/training/1_optimize_unified.py \
             --mode multi-timeframe \
             --n-trials 150 \
             --gpu 0 \
@@ -54,7 +54,7 @@ case $choice in
     3)
         echo ""
         echo "${GREEN}Running rolling window optimization (90/30 days)...${NC}"
-        docker-compose run --rm cappuccino-train python 1_optimize_unified.py \
+        docker-compose run --rm cappuccino-train python scripts/training/1_optimize_unified.py \
             --mode rolling \
             --window-train-days 90 \
             --window-test-days 30 \
@@ -67,7 +67,7 @@ case $choice in
     4)
         echo ""
         echo "${GREEN}Running with sentiment analysis (aya model)...${NC}"
-        docker-compose run --rm cappuccino-train python 1_optimize_unified.py \
+        docker-compose run --rm cappuccino-train python scripts/training/1_optimize_unified.py \
             --use-sentiment \
             --sentiment-model "mvkvl/sentiments:aya" \
             --n-trials 150 \
@@ -79,7 +79,7 @@ case $choice in
     5)
         echo ""
         echo "${GREEN}Running with tightened ranges (50 trials)...${NC}"
-        docker-compose run --rm cappuccino-train python 1_optimize_unified.py \
+        docker-compose run --rm cappuccino-train python scripts/training/1_optimize_unified.py \
             --use-best-ranges \
             --n-trials 50 \
             --gpu 0 \
@@ -100,7 +100,7 @@ case $choice in
 
         echo ""
         echo "${GREEN}Running with custom parameters...${NC}"
-        docker-compose run --rm cappuccino-train python 1_optimize_unified.py \
+        docker-compose run --rm cappuccino-train python scripts/training/1_optimize_unified.py \
             --mode "$mode" \
             --n-trials "$n_trials" \
             --gpu "$gpu" \
@@ -128,7 +128,7 @@ case $choice in
     9)
         echo ""
         echo "${GREEN}Downloading training data...${NC}"
-        docker-compose run --rm cappuccino-train python 0_dl_trainval_data.py
+        docker-compose run --rm cappuccino-train python scripts/data/0_dl_trainval_data.py
         ;;
 
     *)

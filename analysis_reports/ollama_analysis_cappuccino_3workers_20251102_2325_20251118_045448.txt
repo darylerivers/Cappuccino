@@ -1,0 +1,44 @@
+================================================================================
+OLLAMA TRAINING ANALYSIS REPORT
+Study: cappuccino_3workers_20251102_2325
+Model: qwen2.5-coder:7b
+Date: 2025-11-18 04:54:48.602903
+================================================================================
+
+### KEY INSIGHTS
+
+1. **base_break_step**: Top performers have a lower average value (84,000) compared to bottom performers (88,000), indicating they might be more sensitive or adaptive to breaking conditions in the environment.
+2. **norm_action**: The mean difference between top and bottom performers is positive (3,200), suggesting that normalizing actions can help stabilize the agent's behavior.
+3. **net_dimension**: Bottom performers have a slightly higher average network dimension (1497.6) than top performers (1280). This might imply that larger networks are less beneficial or more prone to overfitting.
+4. **base_target_step**: Top performers take fewer steps to reach their targets compared to bottom performers, suggesting they might be more efficient in achieving objectives.
+5. **eval_time_gap**: The difference is negative (9), indicating that top performers evaluate their performance less frequently than bottom performers, possibly leading to higher instability or lack of convergence.
+6. **norm_reward_exp**: Top performers have a slightly higher average normalized reward exponent (-9.1) compared to bottom performers (-10.5), which might indicate they are more sensitive to extreme rewards.
+7. **thread_num**: The top performers use more threads (13.5) than the bottom performers (12.3), suggesting that parallelization can improve performance.
+8. **ppo_epochs**: Bottom performers have a slightly higher number of PPO epochs (10.8) compared to top performers (10), indicating they might benefit from fewer iterations.
+
+### POTENTIAL ISSUES
+
+1. **NaN Values**: The presence of NaN values in the best value indicates potential issues with data handling or normalization.
+2. **High Std Dev and Failure Rate**: Despite having a mean and median that are positive, the high standard deviation (0.033521) and relatively high failure rate (9 out of 4651 trials) suggest inconsistent performance.
+3. **Performance Variability**: The significant difference in performance between top and bottom performers (best value: 0.073734, worst value: -0.116391) indicates variability that needs to be addressed.
+
+### RECOMMENDATIONS
+
+1. **Reduce `base_break_step`**: Lower the average `base_break_step` to match the top performers' lower values (e.g., around 80,000). This could improve adaptability.
+2. **Increase `norm_action`**: Normalize actions more aggressively (e.g., increase the value to around 35,000) to stabilize the agent's behavior.
+3. **Optimize Network Size**: Experiment with a smaller network size for top performers (e.g., reduce net_dimension to around 1200) to see if it improves stability and generalization.
+4. **Reduce `eval_time_gap`**: Increase the frequency of evaluations for bottom performers (e.g., set eval_time_gap to around 75) to improve convergence and stability.
+5. **Fine-tune PPO Epochs**: Reduce the number of epochs for top performers (e.g., decrease ppo_epochs to around 8) to balance between exploration and exploitation.
+
+### SEARCH SPACE REFINEMENT
+
+1. **Reduce `net_dimension` Range**: Narrow the range for `net_dimension` from 1024 to 1536 to focus on values that performed well.
+2. **Adjust `base_break_step` Range**: Expand the range for `base_break_step` from 75,000 to 90,000 to explore a broader range of breaking conditions.
+3. **Refine `eval_time_gap` Range**: Narrow the range for `eval_time_gap` from 45 to 80 to concentrate on values that improved performance.
+
+### ALGORITHMIC SUGGESTIONS
+
+1. **Try PPO with Different Clipping Ratios**: Experiment with different clipping ratios in PPO (e.g., 0.2 and 0.3) to see if they improve stability.
+2. **Combine SAC with TD3**: Consider combining SAC's exploration strategy with TD3's value function approximation to leverage their strengths.
+
+By implementing these recommendations, you should be able to refine the hyperparameters and potentially improve the overall performance of your DRL agent in cryptocurrency trading environments.

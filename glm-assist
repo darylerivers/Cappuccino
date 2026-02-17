@@ -1,0 +1,6 @@
+#!/bin/bash
+# GLM Code Assistant Launcher
+# Makes GLM-4 function like Claude Code for local coding assistance
+
+cd /opt/user-data/experiment/cappuccino
+python3 integrations/glm_code_assistant.py "$@"

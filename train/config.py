@@ -75,8 +75,8 @@ class Arguments:
 
         """Arguments for device"""
         cpu_total = os.cpu_count() or 16
-        self.thread_num = max(12, min(cpu_total, cpu_total - 2))
-        self.worker_num = max(8, min(cpu_total - 4, 12))
+        self.thread_num = max(4, min(cpu_total, cpu_total - 2))
+        self.worker_num = 2  # Limited to 2-3 for RAM stability
         self.random_seed = 0  # initialize random seed in self.init_before_training()
         self.learner_gpus = 0  # `int` means the ID of single GPU, -1 means CPU
 

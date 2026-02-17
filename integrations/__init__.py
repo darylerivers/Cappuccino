@@ -1,0 +1,3 @@
+"""
+Cappuccino integrations module
+"""

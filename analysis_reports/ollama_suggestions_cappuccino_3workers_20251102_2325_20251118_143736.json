@@ -1,0 +1,26 @@
+[
+  {
+    "rationale": "Explores near the best performing region by reducing lr and increasing batch size while maintaining a slightly higher gamma for better exploration.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "ppo_epochs": 12,
+    "net_dimension": 16384
+  },
+  {
+    "rationale": "Explores the top performers' cluster by keeping lr and gamma close to their highest performing values while increasing batch size for more exploration.",
+    "learning_rate": 0.0005,
+    "batch_size": 2048,
+    "gamma": 0.98,
+    "ppo_epochs": 16,
+    "net_dimension": 2048
+  },
+  {
+    "rationale": "Balances exploitation and exploration by reducing lr slightly while increasing batch size and gamma for better generalization.",
+    "learning_rate": 0.0003,
+    "batch_size": 1024,
+    "gamma": 0.97,
+    "ppo_epochs": 8,
+    "net_dimension": 1536
+  }
+]

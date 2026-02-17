@@ -1,8 +1,8 @@
 {
   "study_name": "cappuccino_3workers_20251102_2325",
-  "last_trial_count": 4286,
-  "last_analysis_time": "2025-11-17T17:31:10.938182",
-  "analysis_count": 75,
+  "last_trial_count": 5511,
+  "last_analysis_time": "2025-11-19T17:44:09.356450",
+  "analysis_count": 99,
   "tested_configs": [
     {
       "rationale": "Explores the high correlation region of 'max_drawdown_penalty' and 'norm_cash_exp'.",
@@ -16,5 +16,7 @@
     }
   ],
   "best_discovered_value": 0.036637226077389944,
-  "is_running": true
+  "is_running": true,
+  "last_archive_analysis": "2026-02-04T23:53:12.290091",
+  "archive_insights_count": 38
 }

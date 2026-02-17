@@ -1,0 +1,29 @@
+[
+  {
+    "rationale": "Explores a higher learning rate and batch size around the top performer clusters.",
+    "learning_rate": 0.001,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "net_dimension": 1280,
+    "max_grad_norm": 1.0,
+    "value_loss_coef": 0.7
+  },
+  {
+    "rationale": "Explores a lower learning rate and higher batch size around the top performer clusters.",
+    "learning_rate": 0.0005,
+    "batch_size": 1024,
+    "gamma": 0.97,
+    "net_dimension": 1280,
+    "max_grad_norm": 1.5,
+    "value_loss_coef": 0.6
+  },
+  {
+    "rationale": "Explores a mid-level learning rate and batch size around the top performer clusters.",
+    "learning_rate": 0.0003,
+    "batch_size": 512,
+    "gamma": 0.985,
+    "net_dimension": 1280,
+    "max_grad_norm": 1.25,
+    "value_loss_coef": 0.65
+  }
+]

@@ -1,0 +1,24 @@
+╔════════════════════════════════════════════════════════════════╗
+║       Install Systemd Watchdog Service - COPY THIS            ║
+╚════════════════════════════════════════════════════════════════╝
+
+Run this command in your terminal:
+
+    cd /opt/user-data/experiment/cappuccino && sudo bash INSTALL_NOW.sh
+
+That's it! The script will:
+1. Install systemd service
+2. Enable auto-start on boot
+3. Start the watchdog
+4. Show you the status
+
+After installation, verify with:
+
+    sudo systemctl status cappuccino-watchdog
+
+You should see:
+    Active: active (running)
+
+═══════════════════════════════════════════════════════════════
+
+Alternative: If you prefer to review first, see INSTALL_WATCHDOG_SERVICE.md

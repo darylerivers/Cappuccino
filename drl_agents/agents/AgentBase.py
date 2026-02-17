@@ -3,6 +3,7 @@ import torch
 import numpy as np
 import numpy.random as rd
 from copy import deepcopy
+import tempfile
 
 
 class AgentBase:
@@ -100,17 +101,26 @@ class AgentBase:
 
         step_i = 0
         done = False
-        while step_i < target_step or not done:
-            ten_s = torch.as_tensor(state, dtype=torch.float32).unsqueeze(0)
-            ten_a = (
-                self.act.get_action(ten_s.to(self.device)).detach().cpu()
-            )  # different
-            next_s, reward, done, _ = env.step(ten_a[0].numpy())  # different
 
-            traj_list.append((ten_s, reward, done, ten_a))  # different
+        # OPTIMIZATION: Pre-create tensor on GPU to reduce transfer overhead
+        with torch.no_grad():  # Disable gradient for faster inference
+            # Safety: convert done to boolean if it's a tensor
+            done_val = done.item() if isinstance(done, torch.Tensor) else done
+            while step_i < target_step or not done_val:
+                # Create tensor directly on GPU device to avoid CPU->GPU transfer
+                ten_s = torch.as_tensor(state, dtype=torch.float32, device=self.device).unsqueeze(0)
+                ten_a = self.act.get_action(ten_s).detach()
+                # Convert action to numpy for env.step() (keep ten_a on GPU for buffer)
+                action_cpu = ten_a.cpu()[0].numpy() if ten_a.device.type != 'cpu' else ten_a[0].numpy()
+                next_s, reward, done, _ = env.step(action_cpu)  # different
 
-            step_i += 1
-            state = env.reset() if done else next_s
+                # Keep trajectories on GPU (we have 16GB VRAM, only using 4GB)
+                traj_list.append((ten_s, reward, done, ten_a))
+
+                step_i += 1
+                # Safety: handle tensor done values
+                done_val = done.item() if isinstance(done, torch.Tensor) else done
+                state = env.reset() if done_val else next_s
 
         self.states[0] = state
         last_done[0] = step_i
@@ -131,7 +141,7 @@ class AgentBase:
 
         step_i = 0
         ten_dones = torch.zeros(self.env_num, dtype=torch.int, device=self.device)
-        while step_i < target_step or not any(ten_dones):
+        while step_i < target_step or not ten_dones.any():
             ten_a = self.act.get_action(ten_s).detach()  # different
             ten_s_next, ten_rewards, ten_dones, _ = env.step(ten_a)  # different
 
@@ -177,12 +187,12 @@ class AgentBase:
             buf_items[2] = ((~torch.stack(buf_items[2])) * self.gamma).unsqueeze(2)
         else:
             buf_items[1] = (
-                (torch.tensor(buf_items[1], dtype=torch.float32) * self.reward_scale)
+                (torch.tensor(buf_items[1], dtype=torch.float32, device=self.device) * self.reward_scale)
                 .unsqueeze(1)
                 .unsqueeze(2)
             )
             buf_items[2] = (
-                ((1 - torch.tensor(buf_items[2], dtype=torch.float32)) * self.gamma)
+                ((1 - torch.tensor(buf_items[2], dtype=torch.float32, device=self.device)) * self.gamma)
                 .unsqueeze(1)
                 .unsqueeze(2)
             )
@@ -364,7 +374,39 @@ class AgentBase:
 
         def load_torch_file(model_or_optim, _path):
             state_dict = torch.load(_path, map_location=lambda storage, loc: storage)
-            model_or_optim.load_state_dict(state_dict)
+            try:
+                model_or_optim.load_state_dict(state_dict)
+            except RuntimeError as e:
+                # Handle state dimension mismatch gracefully
+                if "size mismatch" in str(e):
+                    print(f"\033[91m⚠️  State dimension mismatch when loading {_path}\033[0m")
+                    print(f"    {str(e)[:200]}...")
+                    print(f"\033[93m    Skipping this checkpoint (different lookback/state_dim)\033[0m")
+                    raise ValueError(f"State dimension mismatch in {_path}") from e
+                else:
+                    raise e
+
+        def atomic_save(obj, save_path):
+            """Atomically save a PyTorch state dict to prevent corruption.
+
+            Uses temp file + rename pattern which is atomic on POSIX systems.
+            """
+            # Get directory of target file
+            save_dir = os.path.dirname(save_path)
+            if not save_dir:
+                save_dir = "."
+
+            # Create temp file in same directory (required for atomic rename)
+            fd, temp_path = tempfile.mkstemp(suffix='.pth.tmp', dir=save_dir)
+            try:
+                os.close(fd)
+                torch.save(obj.state_dict(), temp_path)
+                os.replace(temp_path, save_path)  # Atomic on POSIX
+            except Exception as e:
+                # Clean up temp file on failure
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+                raise e
 
         name_obj_list = [
             ("actor", self.act),
@@ -378,7 +420,7 @@ class AgentBase:
         if if_save:
             for name, obj in name_obj_list:
                 save_path = f"{cwd}/{name}.pth"
-                torch.save(obj.state_dict(), save_path)
+                atomic_save(obj, save_path)
         else:
             for name, obj in name_obj_list:
                 save_path = f"{cwd}/{name}.pth"

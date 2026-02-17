@@ -1,0 +1,48 @@
+You are assisting with Cappuccino, an automated crypto trading system using Deep Reinforcement Learning.
+
+SYSTEM OVERVIEW:
+- DRL agents (DDQN/A2C/PPO) trained via Optuna hyperparameter optimization
+- 500 trained models across 5 studies, tracked in SQLite databases
+- Top models deployed to Alpaca Markets paper trading (1h timeframe)
+- 7 crypto tickers: AAVE/USD, AVAX/USD, BTC/USD, LINK/USD, ETH/USD, LTC/USD, UNI/USD
+
+ARCHITECTURE:
+- State: Cash + Holdings + (14 tech indicators × 7 tickers × lookback)
+- State formula: 1 + 7 + (98 × lookback) = state_dim
+- Actions: Continuous buy/sell/hold per ticker
+- Networks: 3-layer MLP or FT-Transformer encoder
+- Ensemble: Top-N models vote with 60-80% consensus threshold
+
+ACTIVE DEPLOYMENTS (Feb 2026):
+- Trial #91: FT-Transformer, Sharpe 0.1784, lookback=10, state_dim=988 ✓ BEST
+- Trial #100: Ensemble, Sharpe 0.1768, lookback=5, state_dim=498 ✓ ACTIVE
+- Trial #250: Legacy, Sharpe -9.55 live (0.1803 backtest) ✗ FAILING
+
+KEY FILES:
+- scripts/training/1_optimize_unified.py - Main Optuna training
+- scripts/deployment/paper_trader_alpaca_polling.py - Live paper trading
+- monitoring/live_performance_monitor.py - Performance tracking
+- databases/pipeline_v2.db - Model registry
+- paper_trades/trial*_session.csv - Trading logs
+- train_results/cwd_*/trial_*_1h/ - Model checkpoints
+
+CRITICAL CONCEPTS:
+1. Lookback Parameter: Number of historical bars in state (1-20)
+2. State Dimension: Must match between training and deployment or load fails
+3. Auto-Detection: paper_trader_alpaca_polling.py lines 362-386 calculates correct lookback from model checkpoint
+4. Sharpe Ratio: Primary performance metric (annualized)
+5. Paper Trading: CSV logs all trades, monitors compare live vs backtest performance
+
+RECENT FIX (Feb 2026):
+Database stored wrong lookback values → state dimension mismatch on deployment
+Solution: Auto-detection reads model.checkpoint input dimension, calculates implied lookback
+
+CURRENT STATUS:
+- Training: 494/500 trials complete across 5 studies
+- Paper Trading: 2 new models deployed (Trial 91, 100), waiting for first trades at top of hour
+- Monitoring: 3 performance monitors active, tracking Sharpe vs backtest targets
+
+TECHNICAL INDICATORS (14 per ticker):
+Open, High, Low, Close, Volume, MACD, MACD Signal, MACD Hist, RSI, CCI, DX, ATR Regime Shift, Range Breakout Volume, Trend Reacceleration
+
+When analyzing code, focus on: state construction, lookback consistency, model checkpoint loading, Optuna trial parameters, paper trading execution, and performance monitoring thresholds.

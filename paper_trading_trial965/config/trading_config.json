@@ -1,0 +1,78 @@
+{
+  "trading_settings": {
+    "mode": "paper",
+    "initial_capital": 1000.0,
+    "timeframe": "1h",
+    "update_interval_seconds": 3600,
+    "assets": [
+      "AAVE",
+      "AVAX",
+      "BTC",
+      "LINK",
+      "ETH",
+      "LTC",
+      "UNI"
+    ],
+    "max_position_size": 0.2,
+    "min_cash_reserve": 0.04,
+    "trailing_stop_pct": 0.08
+  },
+  "risk_management": {
+    "max_portfolio_drawdown": 0.15,
+    "max_single_position_loss": 0.05,
+    "concentration_limit": 0.3,
+    "daily_loss_limit": 0.03,
+    "emergency_stop_drawdown": 0.2,
+    "position_sizing": "kelly_fraction",
+    "kelly_fraction": 0.25
+  },
+  "data_sources": {
+    "price_provider": "alpaca",
+    "alpaca_base_url": "https://paper-api.alpaca.markets",
+    "data_timeframe": "1h",
+    "lookback_periods": 4,
+    "technical_indicators": [
+      "high",
+      "low",
+      "volume",
+      "macd",
+      "macd_signal",
+      "macd_hist",
+      "rsi",
+      "cci",
+      "dx"
+    ]
+  },
+  "monitoring": {
+    "log_level": "INFO",
+    "log_trades": true,
+    "log_portfolio_value": true,
+    "log_interval_minutes": 60,
+    "performance_metrics": [
+      "sharpe_ratio",
+      "sortino_ratio",
+      "max_drawdown",
+      "win_rate",
+      "profit_factor",
+      "total_return"
+    ],
+    "alert_on_drawdown": 0.1,
+    "alert_on_position_loss": 0.05
+  },
+  "execution": {
+    "order_type": "market",
+    "slippage_model": "fixed",
+    "fixed_slippage_bps": 10,
+    "commission_pct": 0.001,
+    "min_order_size_usd": 100,
+    "max_orders_per_hour": 10
+  },
+  "deployment": {
+    "deployed_date": "2026-01-26",
+    "model_version": "trial_965_rerun",
+    "environment": "paper_trading",
+    "auto_restart": true,
+    "max_runtime_hours": 168,
+    "health_check_interval_minutes": 15
+  }
+}

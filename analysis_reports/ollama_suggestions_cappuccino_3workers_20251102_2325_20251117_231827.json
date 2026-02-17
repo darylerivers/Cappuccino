@@ -1,0 +1,29 @@
+[
+  {
+    "rationale": "High correlation with performance and exploration near top performers.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1536,
+    "ppo_epochs": 12,
+    "value_loss_coef": 0.75
+  },
+  {
+    "rationale": "Exploring a different region with high correlation to performance.",
+    "learning_rate": 5e-05,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "net_dimension": 1280,
+    "ppo_epochs": 10,
+    "value_loss_coef": 0.7
+  },
+  {
+    "rationale": "Combining high correlation parameters with moderate exploration.",
+    "learning_rate": 5e-05,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1408,
+    "ppo_epochs": 14,
+    "value_loss_coef": 0.72
+  }
+]

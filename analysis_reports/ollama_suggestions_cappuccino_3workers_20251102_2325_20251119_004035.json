@@ -1,0 +1,30 @@
+[
+  {
+    "rationale": "Explores a slightly lower learning rate and larger batch size, which are known to work well in many scenarios.",
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "net_dimension": 1280,
+    "ppo_epochs": 10,
+    "use_lr_schedule": 0
+  },
+  {
+    "rationale": "Tries a higher value for the time decay floor and slightly reduces the learning rate, which might help in stabilizing training.",
+    "learning_rate": 5e-05,
+    "batch_size": 256,
+    "gamma": 0.98,
+    "net_dimension": 1296,
+    "ppo_epochs": 8,
+    "time_decay_floor": 0.3
+  },
+  {
+    "rationale": "Explores a different range for the lr_schedule_factor and uses a lower value for max_drawdown_penalty, which might reduce overfitting.",
+    "learning_rate": 5e-05,
+    "batch_size": 128,
+    "gamma": 0.97,
+    "net_dimension": 1296,
+    "ppo_epochs": 12,
+    "lr_schedule_factor": 0.7,
+    "max_drawdown_penalty": 0.05
+  }
+]

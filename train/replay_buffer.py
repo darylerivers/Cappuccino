@@ -31,36 +31,44 @@ class ReplayBuffer:  # for off-policy
             buf_state_size, dtype=torch.float32, device=self.device
         )
 
-    def extend_buffer(self, state, other):  # CPU array to CPU array
+    def extend_buffer(self, state, other):
         size = len(other)
         next_idx = self.next_idx + size
 
         if next_idx > self.max_len:
-            self.buf_state[self.next_idx : self.max_len] = state[
-                : self.max_len - self.next_idx
-            ]
-            self.buf_other[self.next_idx : self.max_len] = other[
-                : self.max_len - self.next_idx
-            ]
+            # Transfer remaining data to the end of the buffer
+            remaining_size = self.max_len - self.next_idx
+            self.buf_state[self.next_idx : self.max_len].copy_(
+                state[:remaining_size], non_blocking=True
+            )
+            self.buf_other[self.next_idx : self.max_len].copy_(
+                other[:remaining_size], non_blocking=True
+            )
             self.if_full = True
 
+            # Wrap around to the beginning of the buffer
             next_idx = next_idx - self.max_len
-            self.buf_state[0:next_idx] = state[-next_idx:]
-            self.buf_other[0:next_idx] = other[-next_idx:]
+            self.buf_state[0:next_idx].copy_(state[-next_idx:], non_blocking=True)
+            self.buf_other[0:next_idx].copy_(other[-next_idx:], non_blocking=True)
         else:
-            self.buf_state[self.next_idx : next_idx] = state
-            self.buf_other[self.next_idx : next_idx] = other
+            # Direct copy without slicing
+            self.buf_state[self.next_idx : next_idx].copy_(
+                state, non_blocking=True if self.device.type == 'cuda' else False
+            )
+            self.buf_other[self.next_idx : next_idx].copy_(
+                other, non_blocking=True if self.device.type == 'cuda' else False
+            )
         self.next_idx = next_idx
 
-    def update_buffer(self, traj_lists):
-        steps = 0
-        r_exp = 0.0
-        for traj_list in traj_lists:
-            self.extend_buffer(state=traj_list[0], other=torch.hstack(traj_list[1:]))
 
-            steps += traj_list[1].shape[0]
-            r_exp += traj_list[1].mean().item()
-        return steps, r_exp / len(traj_lists)
+#    def update_buffer(self, traj_lists):
+#        r_exp = 0.0
+#        for traj_list in traj_lists:
+#            self.extend_buffer(state=traj_list[0], other=torch.hstack(traj_list[1:]))
+#
+#            steps += traj_list[1].shape[0]
+#            r_exp += traj_list[1].mean().item()
+#        return steps, r_exp / len(traj_lists)
 
     def sample_batch(self, batch_size) -> tuple:
         indices = rd.randint(self.now_len - 1, size=batch_size)
@@ -122,23 +130,25 @@ class ReplayBuffer:  # for off-policy
             self.update_now_len()
             state_dim = self.buf_state.shape[1]
             other_dim = self.buf_other.shape[1]
-            buf_state = np.empty(
-                (self.max_len, state_dim), dtype=np.float16
-            )  # sometimes np.uint8
-            buf_other = np.empty((self.max_len, other_dim), dtype=np.float16)
 
-            temp_len = self.max_len - self.now_len
-            buf_state[0:temp_len] = (
-                self.buf_state[self.now_len : self.max_len].detach().cpu().numpy()
-            )
-            buf_other[0:temp_len] = (
-                self.buf_other[self.now_len : self.max_len].detach().cpu().numpy()
-            )
+            # Allocate numpy arrays with the correct shape
+            buf_state = np.empty((self.now_len, state_dim), dtype=np.float16)
+            buf_other = np.empty((self.now_len, other_dim), dtype=np.float16)
 
-            buf_state[temp_len:] = self.buf_state[: self.now_len].detach().cpu().numpy()
-            buf_other[temp_len:] = self.buf_other[: self.now_len].detach().cpu().numpy()
+            # Copy data from GPU to CPU (if on GPU)
+            if self.device.type == 'cuda':
+                buf_state[:] = (
+                    self.buf_state[:self.now_len].detach().cpu().numpy()
+                )
+                buf_other[:] = (
+                    self.buf_other[:self.now_len].detach().cpu().numpy()
+                )
+            else:
+                buf_state[:] = self.buf_state[:self.now_len].numpy()
+                buf_other[:] = self.buf_other[:self.now_len].numpy()
 
             np.savez_compressed(save_path, buf_state=buf_state, buf_other=buf_other)
+
             print(f"| ReplayBuffer save in: {save_path}")
         elif os.path.isfile(save_path):
             buf_dict = np.load(save_path)
@@ -156,13 +166,65 @@ class ReplayBuffer:  # for off-policy
             print(f"| ReplayBuffer load: {save_path}")
 
 
-class ReplayBufferList(list):  # for on-policy
-    def __init__(self):
+class ReplayBufferListHybrid(list):
+    """Optimized replay buffer with adaptive strategy."""
+
+    def __init__(self, gpu_id=0, pin_to_gpu=True):
         list.__init__(self)
+        self.pin_to_gpu = pin_to_gpu
+        self.device = torch.device(
+            f"cuda:{gpu_id}" if (torch.cuda.is_available() and (gpu_id >= 0) and pin_to_gpu) else "cpu"
+        )
+        self._last_size = 0
 
     def update_buffer(self, traj_list):
-        cur_items = list(map(list, zip(*traj_list)))
-        self[:] = [torch.cat(item, dim=0) for item in cur_items]
+        if not traj_list:
+            return 0, 0.0
+
+        num_items = len(traj_list[0])
+        total_steps = sum(len(traj[0]) for traj in traj_list)
+
+        # Clear old buffer BEFORE allocating new one
+        old_buffer = list(self)  # Save reference
+        self.clear()
+        del old_buffer  # Explicit delete
+
+        # Force immediate cleanup if memory pressure
+        if self.pin_to_gpu and torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+        # Build new buffer efficiently
+        result = []
+        for item_idx in range(num_items):
+            if self.pin_to_gpu and torch.cuda.is_available():
+                # Pre-allocate on GPU
+                first_item = traj_list[0][item_idx]
+                item_shape = [total_steps] + list(first_item.shape[1:])
+                combined = torch.empty(item_shape,
+                                      dtype=first_item.dtype,
+                                      device=self.device)
+
+                # Fill with non-blocking transfers
+                offset = 0
+                for traj in traj_list:
+                    item = traj[item_idx]
+                    item_len = len(item)
+                    combined[offset:offset+item_len].copy_(item, non_blocking=True)
+                    offset += item_len
+
+                result.append(combined)
+            else:
+                # CPU path: simple concatenation
+                items = [traj[item_idx] for traj in traj_list]
+                result.append(torch.cat(items, dim=0))
+                del items
+
+        # Update buffer
+        self.extend(result)
+
+        # Cleanup
+        if self.pin_to_gpu and torch.cuda.is_available():
+            torch.cuda.synchronize()
 
         steps = self[1].shape[0]
         r_exp = self[1].mean().item()
@@ -215,18 +277,30 @@ class ReplayBufferMP:
 
     def sample_batch(self, batch_size) -> list:
         bs = batch_size // self.worker_num
-        list_items = [self.buffers[i].sample_batch(bs) for i in range(self.worker_num)]
+        #list_items = [self.buffers[i].sample_batch(bs) for i in range(self.worker_num)]
         # list_items of reward, mask, action, state, next_state
         # list_items of reward, mask, action, state, next_state, is_weights (PER)
 
-        list_items = list(map(list, zip(*list_items)))  # 2D-list transpose
-        return [torch.cat(item, dim=0) for item in list_items]
+        #list_items = list(map(list, zip(*list_items)))  # 2D-list transpose
+        #return [torch.cat(item, dim=0) for item in list_items]
+        result = []
+        for i in range(len(self.buffers[0].sample_batch(bs))):
+            stacked = torch.stack([buf.sample_batch(bs)[i] for buf in self.buffers], dim=0)
+            if self.device.type == 'cuda':
+                stacked = stacked.to(self.device, non_blocking=True)
+            result.append(stacked)
+        return result
 
-    def sample_batch_one_step(self, batch_size) -> list:
-        bs = batch_size // self.worker_num
-        list_items = [
-            self.buffers[i].sample_batch_one_step(bs) for i in range(self.worker_num)
-        ]
+    def sample_batch_one_step(self, batch_size):
+        indices = rd.randint(self.now_len - 1, size=batch_size)
+        return (
+            self.buf_other[indices, 0:1],
+            self.buf_other[indices, 1:2],
+            self.buf_other[indices, 2:],
+            self.buf_state[indices],
+            self.buf_state[indices + 1 if indices + 1 < self.now_len else 0],  # Handle wrap-around
+        )
+
         # list_items of reward, mask, action, state, next_state
         # list_items of reward, mask, action, state, next_state, is_weights (PER)
 
@@ -289,26 +363,33 @@ class BinarySearchTree:
             tree_id = (tree_id - 1) // 2  # faster than the recursive loop
             self.prob_ary[tree_id] += delta
 
-    def update_ids(self, data_ids, prob=10):  # 10 is max_prob
-        ids = data_ids + self.memo_len - 1
-        self.now_len += (ids >= self.now_len).sum()
+    def update_ids(self, data_ids, prob=10):
+        # Validate data_ids and convert to internal indices
+        ids = np.array(data_ids) + self.memo_len - 1
+        if np.any(ids >= len(self.prob_ary)):
+            raise ValueError("data_ids out of bounds")
+
+        # Update the number of valid entries
+        self.now_len += (ids < self.now_len).sum()
 
         upper_step = self.depth - 1
-        self.prob_ary[
-            ids
-        ] = prob  # here, ids means the indices of given children (maybe the right ones or left ones)
         p_ids = (ids - 1) // 2
 
-        while upper_step:  # propagate the change through tree
-            ids = (
-                p_ids * 2 + 1
-            )  # in this while loop, ids means the indices of the left children
-            self.prob_ary[p_ids] = self.prob_ary[ids] + self.prob_ary[ids + 1]
+        while upper_step:
+            for pid in p_ids:
+                if pid >= len(self.prob_ary):
+                    continue
+                left_child = 2 * pid + 1
+                right_child = left_child + 1
+                self.prob_ary[pid] = (
+                    self.prob_ary[left_child] + self.prob_ary[right_child]
+                )
             p_ids = (p_ids - 1) // 2
             upper_step -= 1
 
-        self.prob_ary[0] = self.prob_ary[1] + self.prob_ary[2]
-        # because we take depth-1 upper steps, ps_tree[0] need to be updated alone
+        if len(self.prob_ary) > 0:
+            self.prob_ary[0] = self.prob_ary[1] + self.prob_ary[2]
+
 
     def get_leaf_id(self, v):
         """Tree structure and array storage:

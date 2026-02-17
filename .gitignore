@@ -81,3 +81,7 @@ JOB_*.md
 # Keep templates
 !.env.template
 !requirements.txt
+
+# Discord secrets
+.env
+.env.discord

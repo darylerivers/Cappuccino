@@ -7,9 +7,11 @@ from train.run import train_and_evaluate, train_and_evaluate_mp, init_agent
 
 from drl_agents.agents import AgentDDPG, AgentPPO, AgentSAC, AgentTD3, AgentA2C
 
-MODELS = {"ddpg": AgentDDPG, "td3": AgentTD3, "sac": AgentSAC, "ppo": AgentPPO, "a2c": AgentA2C}
+from drl_agents.agents import AgentPPO_FT
+
+MODELS = {"ddpg": AgentDDPG, "td3": AgentTD3, "sac": AgentSAC, "ppo": AgentPPO, "ppo_ft": AgentPPO_FT, "a2c": AgentA2C}
 OFF_POLICY_MODELS = ["ddpg", "td3", "sac"]
-ON_POLICY_MODELS = ["ppo", "a2c"]
+ON_POLICY_MODELS = ["ppo", "ppo_ft", "a2c"]
 """MODEL_KWARGS = {x: config.__dict__[f"{x.upper()}_PARAMS"] for x in MODELS.keys()}
 
 NOISE = {
@@ -36,7 +38,8 @@ class DRLAgent:
     """
 
     def __init__(self, env, price_array, tech_array, env_params, if_log,
-                 sentiment_service=None, use_sentiment=False, tickers=None):
+                 sentiment_service=None, use_sentiment=False, tickers=None,
+                 use_timeframe_constraint=False, timeframe=None, data_interval='1h'):
         self.env = env
         self.price_array = price_array
         self.tech_array = tech_array
@@ -45,6 +48,9 @@ class DRLAgent:
         self.sentiment_service = sentiment_service
         self.use_sentiment = use_sentiment
         self.tickers = tickers
+        self.use_timeframe_constraint = use_timeframe_constraint
+        self.timeframe = timeframe
+        self.data_interval = data_interval
 
     def get_model(self, model_name, gpu_id, model_kwargs):
 
@@ -54,14 +60,45 @@ class DRLAgent:
             "if_train": False,
         }
 
-        env = self.env(config=env_config,
-                       env_params=self.env_params,
-                       if_log=self.if_log,
-                       sentiment_service=self.sentiment_service,
-                       use_sentiment=self.use_sentiment,
-                       tickers=self.tickers)
+        # Check if using vectorized environment (has n_envs parameter)
+        import inspect
+        env_sig = inspect.signature(self.env.__init__)
+        if 'n_envs' in env_sig.parameters:
+            # Vectorized environment - pass n_envs from env_params
+            n_envs = self.env_params.get('n_envs', 8)  # Default 8 parallel envs
+            env = self.env(config=env_config,
+                           env_params=self.env_params,
+                           n_envs=n_envs,
+                           if_log=self.if_log,
+                           sentiment_service=self.sentiment_service,
+                           use_sentiment=self.use_sentiment,
+                           tickers=self.tickers,
+                           use_timeframe_constraint=self.use_timeframe_constraint,
+                           timeframe=self.timeframe,
+                           data_interval=self.data_interval)
+            env.env_num = n_envs  # CRITICAL: Set env_num for vectorized environments
+        else:
+            # Standard single environment
+            env = self.env(config=env_config,
+                           env_params=self.env_params,
+                           if_log=self.if_log,
+                           sentiment_service=self.sentiment_service,
+                           use_sentiment=self.use_sentiment,
+                           tickers=self.tickers,
+                           use_timeframe_constraint=self.use_timeframe_constraint,
+                           timeframe=self.timeframe,
+                           data_interval=self.data_interval)
+            env.env_num = 1
 
-        env.env_num = 1
+        # For GPU environment, free RAM after data moved to VRAM
+        from environment_Alpaca_gpu import GPUBatchCryptoEnv
+        if isinstance(env, GPUBatchCryptoEnv):
+            # Data is now on GPU, free NumPy copies in RAM
+            self.price_array = None
+            self.tech_array = None
+            import gc
+            gc.collect()
+
         agent = MODELS[model_name]
         if model_name not in MODELS:
             raise NotImplementedError("NotImplementedError")
@@ -144,8 +181,14 @@ class DRLAgent:
             agent = init_agent(args, gpu_id=gpu_id)
             act = agent.act
             device = agent.device
-        except BaseException:
-            raise ValueError("Fail to load agent!")
+        except ValueError as e:
+            # State dimension mismatch - re-raise to mark trial as PRUNED
+            if "State dimension mismatch" in str(e):
+                raise e
+            else:
+                raise ValueError(f"Fail to load agent: {str(e)}") from e
+        except BaseException as e:
+            raise ValueError(f"Fail to load agent: {str(e)}") from e
 
         # test on the testing env
         _torch = torch
@@ -178,7 +221,13 @@ class DRLAgent:
                 episode_total_assets.append(total_asset)
                 episode_return = total_asset / environment.initial_total_asset
                 episode_returns.append(episode_return)
-                if done:
+                # Handle both scalar and tensor done values (vectorized envs return tensors)
+                if isinstance(done, _torch.Tensor):
+                    done_cpu = done.cpu() if done.is_cuda else done
+                    done_val = done_cpu.any().item() if done_cpu.numel() > 1 else done_cpu.item()
+                else:
+                    done_val = done
+                if done_val:
                     break
         print("\n Test Finished!")
         print("episode_return: ", episode_return - 1, '\n')

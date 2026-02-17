@@ -1,0 +1,194 @@
+{
+  "timestamp": "2026-01-01T02:10:33.303669",
+  "total_trials_analyzed": 13113,
+  "archived_trials": 3461,
+  "current_ensemble_size": 20,
+  "correlations": {
+    "gamma": 0.341,
+    "min_cash_reserve": -0.3307,
+    "norm_action": 0.2975,
+    "norm_tech_exp": -0.295,
+    "volatility_penalty": -0.2912,
+    "concentration_penalty": 0.2406,
+    "learning_rate": -0.1966,
+    "lookback": 0.1939,
+    "kl_target": -0.1797,
+    "eval_time_gap": -0.1779,
+    "lr_schedule_factor": -0.171,
+    "thread_num": 0.1587,
+    "trailing_stop_pct": -0.1345,
+    "batch_size": -0.1288,
+    "gae_lambda": 0.1216,
+    "norm_stocks_exp": -0.11,
+    "value_loss_coef": -0.1034,
+    "max_drawdown_penalty": 0.0968,
+    "ppo_epochs": 0.0959,
+    "base_break_step": 0.0749,
+    "net_dimension": 0.0671,
+    "entropy_coef": -0.0651,
+    "max_grad_norm": -0.0614,
+    "clip_range": 0.0566,
+    "base_target_step": 0.0551,
+    "time_decay_floor": 0.054,
+    "use_lr_schedule": 0.0349,
+    "norm_reward_exp": -0.0146,
+    "worker_num": 0.0087,
+    "lr_schedule_type": 0.0078,
+    "norm_cash_exp": 0.0055,
+    "adam_epsilon": 0.0003
+  },
+  "parameter_sweet_spots": {
+    "gamma": {
+      "mean": 0.980706,
+      "std": 0.011946,
+      "min": 0.88,
+      "max": 0.99
+    },
+    "min_cash_reserve": {
+      "mean": 0.086096,
+      "std": 0.044253,
+      "min": 0.03,
+      "max": 0.25
+    },
+    "norm_action": {
+      "mean": 23156.531532,
+      "std": 3096.083803,
+      "min": 7000.0,
+      "max": 25000.0
+    },
+    "norm_tech_exp": {
+      "mean": -15.21997,
+      "std": 0.626577,
+      "min": -18.0,
+      "max": -15.0
+    },
+    "volatility_penalty": {
+      "mean": 0.005429,
+      "std": 0.009197,
+      "min": 0.0,
+      "max": 0.05
+    }
+  },
+  "interactions": [
+    {
+      "params": [
+        "gamma",
+        "min_cash_reserve"
+      ],
+      "correlation": -0.3221
+    },
+    {
+      "params": [
+        "gamma",
+        "norm_action"
+      ],
+      "correlation": 0.3157
+    },
+    {
+      "params": [
+        "gamma",
+        "norm_tech_exp"
+      ],
+      "correlation": -0.3719
+    },
+    {
+      "params": [
+        "min_cash_reserve",
+        "norm_tech_exp"
+      ],
+      "correlation": 0.298
+    },
+    {
+      "params": [
+        "norm_action",
+        "norm_tech_exp"
+      ],
+      "correlation": -0.3481
+    }
+  ],
+  "top_performers": {
+    "count": 20,
+    "mean_value": 0.143452,
+    "trial_numbers": [
+      191,
+      192,
+      26,
+      83,
+      25,
+      157,
+      156,
+      87,
+      86,
+      195,
+      172,
+      179,
+      177,
+      173,
+      194,
+      178,
+      166,
+      180,
+      144,
+      190
+    ]
+  },
+  "overlooked_trials": [
+    {
+      "trial_number": 191,
+      "value": 0.156558,
+      "rank_overall": 1
+    },
+    {
+      "trial_number": 192,
+      "value": 0.156517,
+      "rank_overall": 2
+    },
+    {
+      "trial_number": 26,
+      "value": 0.156289,
+      "rank_overall": 3
+    },
+    {
+      "trial_number": 83,
+      "value": 0.155774,
+      "rank_overall": 4
+    },
+    {
+      "trial_number": 25,
+      "value": 0.155465,
+      "rank_overall": 5
+    },
+    {
+      "trial_number": 157,
+      "value": 0.155207,
+      "rank_overall": 6
+    },
+    {
+      "trial_number": 156,
+      "value": 0.15513,
+      "rank_overall": 7
+    },
+    {
+      "trial_number": 87,
+      "value": 0.154877,
+      "rank_overall": 8
+    },
+    {
+      "trial_number": 86,
+      "value": 0.154592,
+      "rank_overall": 9
+    },
+    {
+      "trial_number": 195,
+      "value": 0.133606,
+      "rank_overall": 10
+    }
+  ],
+  "statistics": {
+    "mean_value": 0.018465,
+    "std_value": 0.030108,
+    "best_value": 0.156558,
+    "worst_value": -0.116391
+  },
+  "ai_insights": "### KEY FINDINGS:\n1. **High Correlation with `gamma`**: The parameter `gamma`, which controls the discount factor in reinforcement learning, has a strong negative correlation with several other parameters such as `min_cash_reserve`, `norm_tech_exp`, and `volatility_penalty`. This suggests that high values of `gamma` might lead to suboptimal performance due to excessive discounting.\n2. **Positive Correlation with `norm_action`**: The parameter `norm_action`, which normalizes the action space, has a positive correlation with `gamma`. This indicates that higher normalization levels for actions might be beneficial when using high discount factors.\n3. **Negative Correlation with `min_cash_reserve` and `volatility_penalty`**: Both `min_cash_reserve` and `volatility_penalty` have negative correlations with other parameters, suggesting that reducing these penalties could potentially improve performance.\n\n### OVERLOOKED OPPORTUNITIES:\nThe \"overlooked_trials\" data shows that the top-performing configurations (trials 191, 192, 26, etc.) have significantly higher values than the average. These high-performing trials should be reconsidered and possibly re-evaluated to understand why they performed so well and how their parameters can be generalized or fine-tuned for better performance.\n\n### PARAMETER RECOMMENDATIONS:\nBased on the correlations and sweet spots:\n1. **`gamma`:** Focus on values between 0.95 and 0.98, as these are within the mean and standard deviation range of the parameter sweet spot.\n2. **`min_cash_reserve`:** Aim for values around 0.1 to 0.15, which is slightly above the mean but still within the acceptable range based on the sweet spots.\n3. **`norm_action`:** Target normalization levels between 10,000 and 30,000, as these are within the mean and standard deviation of the parameter sweet spot.\n\n### INTERACTIONS TO EXPLORE:\nBased on the interaction data:\n1. **Combination of `gamma` and `norm_tech_exp`:** Investigate how different values of `gamma` interact with varying levels of `norm_tech_exp`. This could reveal optimal ranges for each parameter when used together.\n2. **Combination of `min_cash_reserve` and `volatility_penalty`:** Explore how reducing both the minimum cash reserve and volatility penalty affects performance. This interaction might highlight synergies that could lead to better outcomes.\n\n### ACTIONABLE SUGGESTIONS:\n1. **Parameter Grid Search:** Conduct a parameter grid search focusing on the recommended ranges for `gamma`, `min_cash_reserve`, and `norm_action`. This will help identify the most effective combinations of these parameters.\n2. **Adaptive Learning Rate:** Implement an adaptive learning rate scheduler that adjusts based on performance metrics, such as value loss or reward improvement. This could help mitigate issues related to the `learning_rate` parameter.\n3. **Ensemble Training:** Use a larger ensemble size (e.g., 50-100 models) to average out the noise and potentially improve overall performance. This can be done by training multiple models with slightly different hyperparameters and combining their predictions.\n\nBy following these recommendations, future training runs can be more focused on optimizing key parameters and exploring promising parameter combinations, leading to improved performance in cryptocurrency trading."
+}

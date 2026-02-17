@@ -16,10 +16,22 @@ def train_and_evaluate(args):
     args.init_before_training()
     gpu_id = args.learner_gpus
 
-    # Performance optimizations
-    torch.backends.cudnn.benchmark = True  # Enable cuDNN auto-tuner
-    torch.backends.cuda.matmul.allow_tf32 = True  # Enable TF32 on Ampere GPUs
+    # ROCm Performance optimizations for RX 7900 GRE (gfx1100)
+    torch.backends.cudnn.benchmark = True  # Enable auto-tuner
+    torch.backends.cuda.matmul.allow_tf32 = True  # Enable TF32
     torch.backends.cudnn.allow_tf32 = True
+    torch.backends.cudnn.deterministic = False  # Non-deterministic for speed
+
+    # ROCm-specific: Reduce CPU overhead and maximize GPU saturation
+    if torch.cuda.is_available() and gpu_id >= 0:
+        torch.cuda.set_device(gpu_id)
+        # Pre-allocate memory to reduce allocation overhead during training
+        torch.cuda.empty_cache()
+        # Enable async operations to overlap CPU/GPU work
+        os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'max_split_size_mb:512')
+        # MIOpen optimizations for AMD
+        os.environ.setdefault('MIOPEN_FIND_ENFORCE', '3')  # Exhaustive kernel search
+        os.environ.setdefault('MIOPEN_FIND_MODE', '1')  # Fast find mode
 
     """init"""
     env = build_env(args.env, args.env_func, args.env_args)
@@ -100,7 +112,7 @@ def init_buffer(args, gpu_id):
         buffer.save_or_load_history(args.cwd, if_save=False)
 
     else:
-        buffer = ReplayBufferList()
+        buffer = ReplayBufferList(gpu_id=gpu_id, pin_to_gpu=True)
     return buffer
 
 

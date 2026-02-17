@@ -1,0 +1,157 @@
+{
+  "timestamp": "2025-12-06T08:30:37.795171",
+  "total_trials_analyzed": 462,
+  "archived_trials": 3461,
+  "current_ensemble_size": 20,
+  "correlations": {
+    "gae_lambda": 0.1126,
+    "min_cash_reserve": -0.1108,
+    "norm_cash_exp": -0.1029,
+    "norm_action": 0.0976,
+    "max_grad_norm": 0.0948,
+    "value_loss_coef": -0.0897,
+    "adam_epsilon": 0.0864,
+    "time_decay_floor": 0.0764,
+    "net_dimension": 0.0683,
+    "thread_num": 0.0653,
+    "norm_tech_exp": -0.0628,
+    "entropy_coef": -0.0607,
+    "base_break_step": 0.0598,
+    "norm_stocks_exp": -0.0557,
+    "ppo_epochs": -0.0494,
+    "concentration_penalty": -0.0418,
+    "trailing_stop_pct": 0.041,
+    "use_lr_schedule": -0.0408,
+    "lr_schedule_factor": -0.0382,
+    "kl_target": 0.0365,
+    "max_drawdown_penalty": 0.036,
+    "lookback": -0.0346,
+    "worker_num": 0.0231,
+    "norm_reward_exp": -0.0204,
+    "batch_size": -0.0194,
+    "clip_range": 0.0179,
+    "gamma": 0.0132,
+    "volatility_penalty": 0.0119,
+    "learning_rate": -0.0103,
+    "eval_time_gap": -0.0101,
+    "lr_schedule_type": -0.0096,
+    "base_target_step": -0.0005
+  },
+  "parameter_sweet_spots": {
+    "gae_lambda": {
+      "mean": 0.928085,
+      "std": 0.020392,
+      "min": 0.9,
+      "max": 0.99
+    },
+    "min_cash_reserve": {
+      "mean": 0.129787,
+      "std": 0.049629,
+      "min": 0.05,
+      "max": 0.25
+    },
+    "norm_cash_exp": {
+      "mean": -14.170213,
+      "std": 2.398543,
+      "min": -16.0,
+      "max": -10.0
+    },
+    "norm_action": {
+      "mean": 3574.468085,
+      "std": 3634.046019,
+      "min": 1000.0,
+      "max": 23000.0
+    },
+    "max_grad_norm": {
+      "mean": 1.014894,
+      "std": 0.342611,
+      "min": 0.5,
+      "max": 1.7
+    }
+  },
+  "interactions": [
+    {
+      "params": [
+        "gae_lambda",
+        "min_cash_reserve"
+      ],
+      "correlation": -0.1073
+    },
+    {
+      "params": [
+        "gae_lambda",
+        "norm_cash_exp"
+      ],
+      "correlation": -0.109
+    },
+    {
+      "params": [
+        "gae_lambda",
+        "norm_action"
+      ],
+      "correlation": 0.103
+    },
+    {
+      "params": [
+        "norm_cash_exp",
+        "norm_action"
+      ],
+      "correlation": -0.1169
+    }
+  ],
+  "top_performers": {
+    "count": 20,
+    "mean_value": 0.011437,
+    "trial_numbers": [
+      1,
+      0,
+      419,
+      413,
+      367,
+      136,
+      411,
+      452,
+      168,
+      416,
+      366,
+      98,
+      133,
+      125,
+      116,
+      126,
+      440,
+      143,
+      115,
+      420
+    ]
+  },
+  "overlooked_trials": [
+    {
+      "trial_number": 1,
+      "value": 0.052278,
+      "rank_overall": 1
+    },
+    {
+      "trial_number": 0,
+      "value": 0.034993,
+      "rank_overall": 2
+    },
+    {
+      "trial_number": 441,
+      "value": 0.007016,
+      "rank_overall": 23
+    },
+    {
+      "trial_number": 429,
+      "value": 0.007015,
+      "rank_overall": 24
+    }
+  ],
+  "statistics": {
+    "mean_value": -0.000934,
+    "std_value": 0.007085,
+    "best_value": 0.052278,
+    "worst_value": -0.017912
+  },
+  "ai_insights": "### KEY FINDINGS:\n\n1. **High Correlations with Negative Impact**: Several parameters have high negative correlations with the trial value, indicating that increasing their values could negatively impact performance. These include `min_cash_reserve`, `norm_cash_exp`, and `norm_action`.\n\n2. **Positive Correlation with GAE Lambda**: The parameter `gae_lambda` has a positive correlation with the trial value, suggesting that higher values of this parameter might lead to better performance.\n\n3. **Sweet Spot Identification**: Certain parameters have identified sweet spots, which are optimal ranges for their best performance. For instance, `min_cash_reserve` should be within 0.129787 \u00b1 0.049629 (i.e., between approximately 0.079958 and 0.179616).\n\n### OVERLOOKED OPPORTUNITIES:\n\nThe \"overlooked_trials\" data highlights high-performing configurations that might have been overlooked due to their lower ranks. Specifically, trial number 1 with a value of 0.052278 should be reconsidered as it has the highest overall rank (1). Trial number 0 also stands out with a relatively higher value of 0.034993.\n\n### PARAMETER RECOMMENDATIONS:\n\nBased on the correlations and sweet spots, future training should focus on the following parameter ranges:\n- **GAE Lambda**: Optimal values are around 0.9281 (mean) \u00b1 0.0204 (std), i.e., between approximately 0.9077 and 0.9485.\n- **Min Cash Reserve**: Focus on values within the sweet spot, i.e., between approximately 0.079958 and 0.179616.\n- **Norm Cash Exp**: Aim for values closer to the mean of -14.1702, with a tolerance of \u00b1 2.3985 (i.e., between approximately -16.5687 and -11.7717).\n- **Max Grad Norm**: Optimal values are around 1.0149 (mean) \u00b1 0.3426 (std), i.e., between approximately 0.6723 and 1.3575.\n\n### INTERACTIONS TO EXPLORE:\n\nBased on the interaction data, the following parameter combinations seem promising:\n- **GAE Lambda vs Norm Cash Exp**: Both parameters have negative correlations with trial value, suggesting that optimizing both together could lead to better performance.\n- **GAE Lambda vs Norm Action**: Although there is a positive correlation between these two parameters, it's worth exploring how they interact within different ranges of values.\n\n### ACTIONABLE SUGGESTIONS:\n\n1. **Revisit High-Performing Trials**: Given the high value and low rank of trial number 1 (0.052278), it would be beneficial to revisit this configuration and understand why it performed so well. This could provide insights into potential improvements or overlooked aspects.\n\n2. **Adjust Parameter Ranges**: Based on the identified sweet spots, narrow down the parameter ranges for `min_cash_reserve`, `norm_cash_exp`, and `max_grad_norm` during future training runs. This will help in finding configurations that are more likely to perform well based on historical data.\n\n3. **Explore Interactions**: Conduct additional experiments focusing on the interactions between `gae_lambda`, `norm_cash_exp`, and `norm_action`. By understanding how these parameters interact, you can develop more effective strategies for tuning them together, potentially leading to higher performance outcomes."
+}
