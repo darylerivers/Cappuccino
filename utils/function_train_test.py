@@ -15,54 +15,52 @@ from utils.function_finance_metrics import (compute_data_points_per_year,
 def train_and_test(trial, price_array, tech_array, train_indices, test_indices, env, model_name, env_params, erl_params,
                    break_step, cwd, gpu_id, sentiment_service=None, use_sentiment=False, tickers=None,
                    use_timeframe_constraint=False, timeframe=None, data_interval='1h'):
-    print(f"  [DEBUG] Starting TRAINING phase...")
-    train_start = time.perf_counter()
-    train_agent(price_array,
-                tech_array,
-                train_indices,
-                env, model_name,
-                env_params,
-                erl_params,
-                break_step,
-                cwd,
-                gpu_id,
-                sentiment_service=sentiment_service,
-                use_sentiment=use_sentiment,
-                tickers=tickers,
-                use_timeframe_constraint=use_timeframe_constraint,
-                timeframe=timeframe,
-                data_interval=data_interval)
-    train_duration = time.perf_counter() - train_start
+    try:
+        print(f"  [DEBUG] Starting TRAINING phase...")
+        train_start = time.perf_counter()
+        train_agent(price_array,
+                    tech_array,
+                    train_indices,
+                    env, model_name,
+                    env_params,
+                    erl_params,
+                    break_step,
+                    cwd,
+                    gpu_id,
+                    sentiment_service=sentiment_service,
+                    use_sentiment=use_sentiment,
+                    tickers=tickers,
+                    use_timeframe_constraint=use_timeframe_constraint,
+                    timeframe=timeframe,
+                    data_interval=data_interval)
+        train_duration = time.perf_counter() - train_start
 
-    print(f"  [DEBUG] Starting TESTING phase...")
-    test_start = time.perf_counter()
-    sharpe_bot, sharpe_eqw, drl_rets_tmp = test_agent(price_array,
-                                                      tech_array,
-                                                      test_indices,
-                                                      env, env_params,
-                                                      model_name,
-                                                      cwd,
-                                                      gpu_id,
-                                                      erl_params,
-                                                      trial,
-                                                      sentiment_service=sentiment_service,
-                                                      use_sentiment=use_sentiment,
-                                                      tickers=tickers,
-                                                      use_timeframe_constraint=use_timeframe_constraint,
-                                                      timeframe=timeframe,
-                                                      data_interval=data_interval)
-    test_duration = time.perf_counter() - test_start
+        print(f"  [DEBUG] Starting TESTING phase...")
+        test_start = time.perf_counter()
+        sharpe_bot, sharpe_eqw, drl_rets_tmp = test_agent(price_array,
+                                                          tech_array,
+                                                          test_indices,
+                                                          env, env_params,
+                                                          model_name,
+                                                          cwd,
+                                                          gpu_id,
+                                                          erl_params,
+                                                          trial,
+                                                          sentiment_service=sentiment_service,
+                                                          use_sentiment=use_sentiment,
+                                                          tickers=tickers,
+                                                          use_timeframe_constraint=use_timeframe_constraint,
+                                                          timeframe=timeframe,
+                                                          data_interval=data_interval)
+        test_duration = time.perf_counter() - test_start
 
-    # MEMORY LEAK FIX: Aggressive cleanup after trial
-    # Free GPU memory
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
-        torch.cuda.synchronize()
-
-    # Force garbage collection to free RAM
-    gc.collect()
-
-    return sharpe_bot, sharpe_eqw, drl_rets_tmp, train_duration, test_duration
+        return sharpe_bot, sharpe_eqw, drl_rets_tmp, train_duration, test_duration
+    finally:
+        # MEMORY LEAK FIX: Runs even if training/testing throws an exception
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.synchronize()
+        gc.collect()
 
 
 def train_agent(price_array, tech_array, train_indices, env, model_name, env_params, erl_params, break_step, cwd,
@@ -221,6 +219,7 @@ def test_agent(price_array, tech_array, test_indices, env, env_params, model_nam
 
     # MEMORY LEAK FIX: Delete test arrays and environment
     del price_array_test, tech_array_test, env_instance, account_value_erl, account_value_eqw
+    del eqw_rets_tmp, eqw_cumrets, base_account
     gc.collect()
 
     return sharpe_bot, sharpe_eqw, drl_rets_tmp

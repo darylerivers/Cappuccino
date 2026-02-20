@@ -13,8 +13,10 @@ except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "tqdm", "-q"])
     from tqdm import tqdm
 
+from utils.study_config import get_current_study
+
 DB = "databases/optuna_cappuccino.db"
-STUDY = "cappuccino_auto_20260214_2059"
+STUDY = get_current_study()
 
 def get_trials():
     conn = sqlite3.connect(DB)

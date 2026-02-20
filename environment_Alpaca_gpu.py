@@ -92,6 +92,9 @@ class GPUBatchCryptoEnv:
         self.max_step = self.max_time - self.lookback
         self.target_return = 2.0
 
+        # Pre-computed lookback offsets for vectorized _get_states (avoids allocation per step)
+        self._lookback_offsets = torch.arange(self.lookback, dtype=torch.long, device=self.device)
+
     def reset(self):
         """Reset all environments to initial state."""
         self.time[:] = self.lookback
@@ -110,29 +113,28 @@ class GPUBatchCryptoEnv:
 
     def _get_states(self) -> torch.Tensor:
         """
-        Get current states for all environments (all GPU operations).
+        Get current states for all environments (fully vectorized GPU operations).
         MUST match CryptoEnvAlpaca.get_state() exactly:
           state = [cash*norm_cash, stocks*norm_stocks, tech[t]*norm_tech, tech[t-1]*norm_tech, ...]
         Returns: (n_envs, state_dim) tensor on GPU
+
+        Vectorized implementation: no Python loops, no .item() GPU→CPU syncs.
         """
-        states_list = []
+        # (n_envs, 1)
+        cash_feat = self.cash.unsqueeze(1) * self.norm_cash
 
-        for i in range(self.n_envs):
-            t = self.time[i].item()
+        # (n_envs, n_assets)
+        stocks_feat = self.stocks * self.norm_stocks
 
-            parts = [
-                self.cash[i:i+1] * self.norm_cash,
-                self.stocks[i] * self.norm_stocks,
-            ]
+        # Gather tech history for all envs at once:
+        #   time_indices[i, j] = self.time[i] - j  →  (n_envs, lookback)
+        time_indices = self.time.unsqueeze(1) - self._lookback_offsets
 
-            # Tech indicator history (most recent first, matching CryptoEnvAlpaca)
-            for j in range(self.lookback):
-                parts.append(self.tech_array[t - j] * self.norm_tech)
+        # (n_envs, lookback, n_tech) → flatten to (n_envs, lookback * n_tech)
+        tech_feat = (self.tech_array[time_indices] * self.norm_tech).reshape(self.n_envs, -1)
 
-            state = torch.cat(parts)
-            states_list.append(state)
-
-        return torch.stack(states_list)
+        # (n_envs, 1 + n_assets + lookback * n_tech)
+        return torch.cat([cash_feat, stocks_feat, tech_feat], dim=1)
 
     def step(self, actions):
         """

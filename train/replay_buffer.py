@@ -437,3 +437,7 @@ class BinarySearchTree:
         prob = td_error.squeeze().clamp(1e-6, 10).pow(self.per_alpha)
         prob = prob.cpu().numpy()
         self.update_ids(self.indices, prob)
+
+
+# Backward-compatibility alias: train/run.py imports this name
+ReplayBufferList = ReplayBufferListHybrid

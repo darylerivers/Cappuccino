@@ -52,6 +52,11 @@ def train_and_evaluate(args):
     if_allow_break = args.if_allow_break
     del args
 
+    # Hard wall-clock timeout: prevents infinite loops when step counting breaks.
+    # Normal runs finish in 2-5 min; 20 min is a safe ceiling.
+    _train_start = time.time()
+    _max_wall_seconds = 20 * 60
+
     if_train = True
     while if_train:
         trajectory = agent.explore_env(env, target_step)
@@ -67,11 +72,16 @@ def train_and_evaluate(args):
         dont_break = not if_allow_break
         not_reached_goal = not if_reach_goal
         stop_dir_absent = not os.path.exists(f"{cwd}/stop")
+        within_wall_time = (time.time() - _train_start) < _max_wall_seconds
+
+        if not within_wall_time:
+            print(f"| WallTimeout: training loop exceeded {_max_wall_seconds//60}min — forcing exit")
 
         if_train = (
             (dont_break or not_reached_goal)
             and evaluator.total_step <= break_step
             and stop_dir_absent
+            and within_wall_time
         )
 
         agent.save_or_load_agent(cwd, if_save=if_save)

@@ -171,8 +171,9 @@ class MemoryMonitor:
         # Exit the worker process - watchdog will restart it
         # Use exit code 42 to indicate intentional restart (not a crash)
         print(f"Exiting worker process (PID {os.getpid()}) with exit code 42...")
+        print(f"Sleeping 60s before exit to let memory drain before watchdog restart...")
         sys.stdout.flush()
-        time.sleep(2)  # Give logs time to flush
+        time.sleep(60)  # Let RAM drain before watchdog restarts; prevents immediate cascade on fresh boot
         os._exit(42)  # Immediate exit, bypass Python cleanup
 
     def get_process_memory(self, pid: Optional[int] = None) -> float:

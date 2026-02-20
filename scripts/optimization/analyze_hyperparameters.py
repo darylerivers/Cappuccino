@@ -4,11 +4,17 @@ Analyze hyperparameters of top vs bottom performing trials
 """
 import sqlite3
 import json
+import sys
 from collections import defaultdict
+from pathlib import Path
 import statistics
 
+# Ensure project root is importable regardless of working directory
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from utils.study_config import get_current_study
+
 DB_PATH = "databases/optuna_cappuccino.db"
-STUDY_NAME = "cappuccino_2year_20260112"
+STUDY_NAME = get_current_study()
 
 def get_trial_params(conn, trial_numbers):
     """Get all hyperparameters for given trial numbers"""

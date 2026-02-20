@@ -80,6 +80,16 @@ def cleanup_gpu_memory():
         torch.cuda.empty_cache()
         torch.cuda.synchronize()
     gc.collect()
+    gc.collect()
+    gc.collect()
+    # Force Python's allocator to return free pages to the OS.
+    # Without this, RSS stays high even after gc.collect(), causing
+    # the memory-limit check to fire on every subsequent trial.
+    try:
+        import ctypes
+        ctypes.CDLL("libc.so.6").malloc_trim(0)
+    except Exception:
+        pass
 
 
 def check_vram_usage(label=""):
@@ -594,12 +604,24 @@ def objective_standard(trial, args, price_array, tech_array, time_array, sentime
     print(f"\n{Colors.CYAN}[DEBUG] Objective function called for trial #{trial.number}{Colors.END}")
     sys.stdout.flush()
 
-    # Memory safety check at trial start
+    # Memory safety check at trial start.
+    # If RAM is below threshold, sleep up to 3 times (90s total) to let it recover
+    # before raising TrialPruned.  This prevents the rapid-fire prune cascade where
+    # low RAM after a crash causes hundreds of instant prunes per minute.
+    for _mem_wait in range(3):
+        mem_avail_gb = psutil.virtual_memory().available / (1024 ** 3)
+        if mem_avail_gb >= 2.0:
+            break
+        print(f"{Colors.YELLOW}[Trial #{trial.number}] Low RAM ({mem_avail_gb:.1f} GB free), "
+              f"sleeping 30s before starting (attempt {_mem_wait+1}/3)...{Colors.END}")
+        sys.stdout.flush()
+        time.sleep(30)
     check_memory(trial, f"[Trial #{trial.number} start]", safe_threshold_gb=2.0)
 
     # Track trial start time for timeout detection
     trial_start_time = time.time()
     max_trial_duration = 30 * 60  # 30 minutes maximum per trial
+    process = psutil.Process()  # create once; reused for memory checks inside the loop
 
     # Sample timeframe if multi-timeframe mode
     if args.mode == 'multi-timeframe':
@@ -669,8 +691,6 @@ def objective_standard(trial, args, price_array, tech_array, time_array, sentime
             raise optuna.exceptions.TrialPruned(f"Trial timeout: {elapsed_time/60:.1f} minutes exceeded {max_trial_duration/60} minute limit")
 
         # MEMORY CHECK: Prevent memory leaks
-        import psutil
-        process = psutil.Process()
         mem_gb = process.memory_info().rss / (1024**3)
         if mem_gb > 10.0:  # 8 GB limit per process
             print(f"{Colors.RED}Memory limit exceeded: {mem_gb:.1f}GB{Colors.END}")
@@ -715,6 +735,7 @@ def objective_standard(trial, args, price_array, tech_array, time_array, sentime
                 print(f"    {Colors.RED}Split {split_idx} failed: {e}{Colors.END}")
                 traceback.print_exc()
             trial.report(float('nan'), step=trial.number)  # Log failure
+            cleanup_gpu_memory()
             continue
         except RuntimeError as e:
             if "out of memory" in str(e).lower():
@@ -727,6 +748,7 @@ def objective_standard(trial, args, price_array, tech_array, time_array, sentime
             print(f"{Colors.YELLOW}=== END TRACEBACK ==={Colors.END}")
             sys.stdout.flush()
             trial.report(float('nan'), step=trial.number)
+            cleanup_gpu_memory()
             continue
         except Exception as e:
             print(f"    {Colors.RED}Split {split_idx} failed: {e}{Colors.END}")
@@ -734,6 +756,7 @@ def objective_standard(trial, args, price_array, tech_array, time_array, sentime
             print(f"{Colors.YELLOW}Full traceback:{Colors.END}")
             traceback.print_exc()
             trial.report(float('nan'), step=trial.number)  # Log failure
+            cleanup_gpu_memory()
             continue
 
     if not sharpe_list_bot:
@@ -770,8 +793,6 @@ def objective_standard(trial, args, price_array, tech_array, time_array, sentime
     gc.collect()
 
     # Log final memory state
-    import psutil
-    process = psutil.Process()
     final_mem_gb = process.memory_info().rss / (1024**3)
     print(f"{Colors.CYAN}Trial #{trial.number} final memory: {final_mem_gb:.2f}GB{Colors.END}")
 

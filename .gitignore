@@ -45,9 +45,12 @@ nohup.out
 databases/
 *.db
 *.sqlite
+*.db.backup*
+pipeline_v2.db.backup_old_study
 
 # Data
 data/
+data_old/
 SentimentData/
 
 # Plots
@@ -60,17 +63,48 @@ plots_and_metrics/
 tmp/
 temp/
 *.tmp
+*.save
+*.patch
 
 # Docker
 .dockerignore
 docker-compose.override.yml
 
-# Automation runtime state
-deployments/*.json
-deployments/*.pid
+# Runtime state / PID files
+*.pid
+.heartbeat
+.current_study
+rerun_trial_v2.pid
 
-# Paper trading data
+# Deployments (model binaries + runtime state)
+deployments/
+
+# Model backups
+model_backups/
+
+# Paper trading artifacts
 paper_trades/
+paper_trading_trial965/
+
+# Auto-generated reports and analysis outputs
+analysis_reports/
+
+# Arena runtime state
+arena_state/
+
+# Misc runtime/scratch dirs
+backups/
+contexts/
+trial_archive/
+arena_results/
+api_references
+implementations
+technical_documents
+training_guides
+user_guides
+glm-assist
+project_status
+reports/
 
 # Personal files
 resume.*

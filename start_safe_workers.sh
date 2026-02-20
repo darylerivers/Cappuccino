@@ -2,10 +2,10 @@
 # Start 2 safe workers with GPU optimization
 # Memory-safe configuration to prevent OOM
 
-STUDY="cappuccino_auto_20260214_2059"
+STUDY="cappuccino_auto_20260216_0340"
 N_WORKERS=2
 GPU=0
-N_ENVS=12
+N_ENVS=8  # Reduced from 12 to leave headroom and prevent user-cgroup OOM kills
 
 cd /opt/user-data/experiment/cappuccino
 
@@ -31,6 +31,8 @@ for i in $(seq 1 $N_WORKERS); do
         > logs/worker_safe_$i.log 2>&1 &
     
     PID=$!
+    # Protect from OOM killer (requires root; skipped if unavailable)
+    sudo sh -c "echo -300 > /proc/$PID/oom_score_adj" 2>/dev/null || true
     echo "Worker $i started: PID $PID"
     echo "$PID $(date +%s)" >> logs/worker_pids.txt
     sleep 2

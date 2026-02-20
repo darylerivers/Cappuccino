@@ -10,9 +10,11 @@ import os
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from utils.study_config import get_current_study
+
 # Configuration
 DB_PATH = "databases/optuna_cappuccino.db"
-STUDY_NAME = os.getenv('ACTIVE_STUDY_NAME', 'cappuccino_auto_20260214_2059')
+STUDY_NAME = get_current_study()
 REFRESH_INTERVAL = 10  # seconds
 
 def clear_screen():

@@ -9,6 +9,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+# Ensure project root is importable regardless of working directory
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from utils.study_config import get_current_study
+
 
 def analyze_training_results(db_path: str = "databases/optuna_cappuccino.db"):
     """Analyze all training trials and provide comprehensive statistics."""
@@ -30,7 +34,7 @@ def analyze_training_results(db_path: str = "databases/optuna_cappuccino.db"):
         print("No studies found in database.")
         return
 
-    study_name = 'cappuccino_3workers_20251102_2325'
+    study_name = get_current_study()
     print(f"Study: {study_name}")
     print()
 
