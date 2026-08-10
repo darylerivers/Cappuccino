@@ -1,0 +1,313 @@
+#!/usr/bin/env python3
+"""
+cappuccino-models — Inspect XGBoost models, metrics, and fold performance.
+
+Usage:
+    cappuccino-models overview          # All model metrics + verdict
+    cappuccino-models fold <ASSET>      # Per-fold breakdown for asset
+    cappuccino-models compare           # Compare all assets across folds
+    cappuccino-models model <ASSET> <FOLD>  # Inspect specific model JSON
+    cappuccino-models config            # Show training config
+    cappuccino-models predict           # Run prediction (expensive)
+"""
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+# ── Paths ──────────────────────────────────────────────────────────────────────
+BASE = Path.home() / "cappuccino"
+XGB_DIR = BASE / "xgboost"
+METRICS_FILE = XGB_DIR / "results" / "metrics.json"
+MODEL_DIR = XGB_DIR / "results" / "models"
+CONFIG_FILE = XGB_DIR / "config.yaml"
+
+
+def load_metrics() -> dict:
+    if not METRICS_FILE.exists():
+        print(f"Error: {METRICS_FILE} not found")
+        sys.exit(1)
+    return json.loads(METRICS_FILE.read_text())
+
+
+def load_yaml_config() -> dict:
+    try:
+        import yaml
+        return yaml.safe_load(CONFIG_FILE.read_text()) or {}
+    except Exception:
+        return {}
+
+
+# ── Commands ───────────────────────────────────────────────────────────────────
+
+def cmd_overview(args):
+    """Show all model metrics + verdict."""
+    m = load_metrics()
+
+    print(f"\n{'='*70}")
+    print(f"  XGBOOST MODEL OVERVIEW")
+    print(f"{'='*70}")
+    print(f"  Timestamp: {m.get('timestamp', 'N/A')}")
+    print(f"  Verdict:   {m.get('verdict', 'N/A')}")
+    print(f"  Combined OOS AUC:      {m.get('combined_oos_auc', 0):.4f}")
+    print(f"  Combined OOS Accuracy: {m.get('combined_oos_accuracy', 0):.4f}")
+    print()
+
+    # Per-asset summary
+    per_asset = m.get("per_asset", {})
+    assets = sorted(per_asset.keys())
+
+    print(f"  {'Asset':<8} {'Folds':>6} {'Avg AUC':>9} {'Avg Acc':>9} "
+          f"{'Avg Prec':>9} {'Avg Rec':>9} {'Best Iter':>10}")
+    print(f"  {'-'*8} {'-'*6} {'-'*9} {'-'*9} {'-'*9} {'-'*9} {'-'*10}")
+
+    for asset in assets:
+        folds = per_asset[asset]
+        n_folds = len(folds)
+        avg_auc = sum(f["auc"] for f in folds) / n_folds
+        avg_acc = sum(f["accuracy"] for f in folds) / n_folds
+        avg_prec = sum(f["precision"] for f in folds) / n_folds
+        avg_rec = sum(f["recall"] for f in folds) / n_folds
+        best_iter = max(f["best_iter"] for f in folds)
+
+        print(f"  {asset:<8} {n_folds:>6} {avg_auc:>9.4f} {avg_acc:>9.4f} "
+              f"{avg_prec:>9.4f} {avg_rec:>9.4f} {best_iter:>10}")
+
+    # Verdict analysis
+    verdict = m.get("verdict", "")
+    print(f"\n  Verdict: {verdict}")
+    if verdict == "PASS":
+        print("  All assets meet AUC and accuracy thresholds.")
+    elif verdict == "PARTIAL":
+        print("  Some assets meet thresholds, others need improvement.")
+        # Show which pass/fail
+        cfg = load_yaml_config()
+        auc_thresh = cfg.get("auc_threshold", 0.52)
+        acc_thresh = cfg.get("accuracy_threshold", 0.52)
+        for asset in assets:
+            folds = per_asset[asset]
+            avg_auc = sum(f["auc"] for f in folds) / len(folds)
+            avg_acc = sum(f["accuracy"] for f in folds) / len(folds)
+            auc_ok = avg_auc >= auc_thresh
+            acc_ok = avg_acc >= acc_thresh
+            status = "PASS" if (auc_ok and acc_ok) else "FAIL"
+            print(f"    {asset}: AUC={avg_auc:.4f} ({'OK' if auc_ok else 'BELOW'}), "
+                  f"Acc={avg_acc:.4f} ({'OK' if acc_ok else 'BELOW'}) [{status}]")
+    else:
+        print("  Models do not meet minimum thresholds.")
+
+    print()
+
+
+def cmd_fold(args):
+    """Per-fold breakdown for an asset."""
+    asset = args.asset.upper()
+    m = load_metrics()
+    per_asset = m.get("per_asset", {})
+
+    if asset not in per_asset:
+        print(f"Error: {asset} not found. Available: {sorted(per_asset.keys())}")
+        sys.exit(1)
+
+    folds = per_asset[asset]
+
+    print(f"\n{'='*70}")
+    print(f"  {asset} FOLD BREAKDOWN")
+    print(f"{'='*70}")
+
+    for fold in folds:
+        print(f"\n  Fold {fold['fold']}: {fold.get('test_period', 'N/A')}")
+        print(f"    AUC:       {fold['auc']:.4f}")
+        print(f"    Accuracy:  {fold['accuracy']:.4f}")
+        print(f"    Precision: {fold['precision']:.4f}")
+        print(f"    Recall:    {fold['recall']:.4f}")
+        print(f"    Train:     {fold['n_train']:,} samples")
+        print(f"    Test:      {fold['n_test']:,} samples")
+        print(f"    Best iter: {fold['best_iter']}")
+
+    # F1 score
+    print(f"\n  Derived metrics:")
+    for fold in folds:
+        prec = fold["precision"]
+        rec = fold["recall"]
+        f1 = 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0
+        print(f"    Fold {fold['fold']}: F1 = {f1:.4f}")
+
+    print()
+
+
+def cmd_compare(args):
+    """Compare all assets across folds."""
+    m = load_metrics()
+    per_asset = m.get("per_asset", {})
+    assets = sorted(per_asset.keys())
+
+    # Find all fold numbers
+    all_folds = set()
+    for asset in assets:
+        for f in per_asset[asset]:
+            all_folds.add(f["fold"])
+    all_folds = sorted(all_folds)
+
+    print(f"\n{'='*90}")
+    print(f"  CROSS-ASSET FOLD COMPARISON (AUC)")
+    print(f"{'='*90}")
+
+    for fold_num in all_folds:
+        print(f"\n  Fold {fold_num}:")
+        print(f"    {'Asset':<8} {'AUC':>8} {'Accuracy':>10} {'Precision':>11} "
+              f"{'Recall':>8} {'Test Period':>20}")
+        print(f"    {'-'*8} {'-'*8} {'-'*10} {'-'*11} {'-'*8} {'-'*20}")
+
+        for asset in assets:
+            fold_data = next((f for f in per_asset[asset] if f["fold"] == fold_num), None)
+            if fold_data:
+                period = fold_data.get("test_period", "N/A")
+                print(f"    {asset:<8} {fold_data['auc']:>8.4f} "
+                      f"{fold_data['accuracy']:>10.4f} {fold_data['precision']:>11.4f} "
+                      f"{fold_data['recall']:>8.4f} {period:>20}")
+            else:
+                print(f"    {asset:<8} {'N/A':>8}")
+
+    print()
+
+
+def cmd_model(args):
+    """Inspect specific model JSON."""
+    asset = args.asset.upper()
+    fold = args.fold
+
+    model_file = MODEL_DIR / f"{asset}_fold{fold}.json"
+    if not model_file.exists():
+        print(f"Error: {model_file} not found")
+        # List available
+        available = sorted(MODEL_DIR.glob("*.json"))
+        print(f"Available models:")
+        for f in available:
+            print(f"  {f.name}")
+        sys.exit(1)
+
+    data = json.loads(model_file.read_text())
+
+    print(f"\n{'='*70}")
+    print(f"  MODEL: {model_file.name}")
+    print(f"{'='*70}")
+
+    for key, value in data.items():
+        if isinstance(value, dict):
+            print(f"\n  {key}:")
+            for k2, v2 in value.items():
+                if isinstance(v2, (list, dict)):
+                    print(f"    {k2}: {type(v2).__name__} (len={len(v2)})")
+                else:
+                    print(f"    {k2}: {v2}")
+        elif isinstance(value, list):
+            print(f"  {key}: [{len(value)} items]")
+            for i, item in enumerate(value[:5]):
+                print(f"    [{i}]: {item}")
+            if len(value) > 5:
+                print(f"    ... and {len(value) - 5} more")
+        else:
+            print(f"  {key}: {value}")
+
+    print()
+
+
+def cmd_config(args):
+    """Show training config."""
+    cfg = load_yaml_config()
+    if not cfg:
+        print(f"Error: {CONFIG_FILE} not found or empty")
+        sys.exit(1)
+
+    print(f"\n{'='*70}")
+    print(f"  XGBOOST TRAINING CONFIG")
+    print(f"{'='*70}")
+
+    print(f"  Assets: {', '.join(cfg.get('assets', []))}")
+    print(f"  Target: {cfg.get('target', 'N/A')}")
+    print(f"  Lookback: {cfg.get('lookback_bars', 'N/A')} bars")
+    print(f"  AUC threshold: {cfg.get('auc_threshold', 'N/A')}")
+    print(f"  Accuracy threshold: {cfg.get('accuracy_threshold', 'N/A')}")
+    print(f"  Model dir: {cfg.get('model_dir', 'N/A')}")
+    print(f"  Feature dir: {cfg.get('feature_parquet_dir', 'N/A')}")
+    print(f"  OHLCV dir: {cfg.get('ohlcv_dir', 'N/A')}")
+
+    folds = cfg.get("folds", [])
+    print(f"\n  Folds ({len(folds)}):")
+    for i, fold in enumerate(folds):
+        print(f"    Fold {i+1}: train_end={fold.get('train_end')}mo, "
+              f"test={fold.get('test_start')}-{fold.get('test_end')}mo")
+
+    xgb = cfg.get("xgb", {})
+    print(f"\n  XGBoost hyperparameters:")
+    for k, v in xgb.items():
+        print(f"    {k}: {v}")
+
+    print()
+
+
+def cmd_predict(args):
+    """Run prediction (expensive)."""
+    print(f"\n{'='*70}")
+    print(f"  RUNNING XGBOOST PREDICTION")
+    print(f"{'='*70}")
+    print(f"  Note: This is expensive — it loads features and runs inference.")
+    print(f"  Consider using `python {XGB_DIR}/predict.py` directly instead.")
+    print()
+
+    predict_script = XGB_DIR / "predict.py"
+    if predict_script.exists():
+        import subprocess
+        result = subprocess.run(
+            [sys.executable, str(predict_script)],
+            capture_output=True, text=True, timeout=300
+        )
+        if result.stdout:
+            print(result.stdout)
+        if result.stderr:
+            print(result.stderr)
+        print(f"  Exit code: {result.returncode}")
+    else:
+        print(f"  predict.py not found at {predict_script}")
+
+    print()
+
+
+# ── Main ───────────────────────────────────────────────────────────────────────
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Cappuccino XGBoost model inspection tool",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    sub.add_parser("overview", help="All model metrics + verdict")
+    sub.add_parser("compare", help="Compare all assets across folds")
+    sub.add_parser("config", help="Show training config")
+    sub.add_parser("predict", help="Run prediction (expensive)")
+
+    p_fold = sub.add_parser("fold", help="Per-fold breakdown for asset")
+    p_fold.add_argument("asset", help="Asset symbol (e.g. BTC)")
+
+    p_model = sub.add_parser("model", help="Inspect specific model JSON")
+    p_model.add_argument("asset", help="Asset symbol")
+    p_model.add_argument("fold", type=int, help="Fold number (1, 2, 3)")
+
+    args = parser.parse_args()
+
+    cmds = {
+        "overview": cmd_overview,
+        "fold": cmd_fold,
+        "compare": cmd_compare,
+        "model": cmd_model,
+        "config": cmd_config,
+        "predict": cmd_predict,
+    }
+    cmds[args.command](args)
+
+
+if __name__ == "__main__":
+    main()

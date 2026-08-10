@@ -1,0 +1,349 @@
+#!/usr/bin/env python3
+"""
+cappuccino-momentum — Inspect momentum engine, backtest results, and regime analysis.
+
+Usage:
+    cappuccino-momentum overview        # Engine status + backtest summary
+    cappuccino-momentum backtest        # Detailed backtest metrics
+    cappuccino-momentum regime          # Regime filter analysis
+    cappuccino-momentum sizing          # Position sizing study results
+    cappuccino-momentum config          # Momentum engine config
+    cappuccino-momentum version         # Version + deployment info
+"""
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+# ── Paths ──────────────────────────────────────────────────────────────────────
+BASE = Path.home() / "cappuccino"
+MOM_DIR = BASE / "momentum"
+STATE_FILE = MOM_DIR / "state.json"
+METRICS_FILE = MOM_DIR / "backtest_metrics.json"
+METRICS_V2_FILE = MOM_DIR / "backtest_v2_metrics.json"
+SIZING_FILE = MOM_DIR / "results" / "sizing_study.json"
+VERSION_FILE = MOM_DIR / "version.json"
+CONFIG_FILE = MOM_DIR / "config.yaml"
+CONFIG_V2_FILE = MOM_DIR / "config_v2.yaml"
+
+
+def load_json(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+
+def load_yaml(path: Path) -> dict:
+    try:
+        import yaml
+        return yaml.safe_load(path.read_text()) or {}
+    except Exception:
+        return {}
+
+
+# ── Commands ───────────────────────────────────────────────────────────────────
+
+def cmd_overview(args):
+    """Engine status + backtest summary."""
+    state = load_json(STATE_FILE)
+    metrics = load_json(METRICS_FILE)
+    metrics_v2 = load_json(METRICS_V2_FILE)
+    version = load_json(VERSION_FILE)
+
+    print(f"\n{'='*70}")
+    print(f"  MOMENTUM ENGINE OVERVIEW")
+    print(f"{'='*70}")
+
+    # Version
+    print(f"  Version: {version.get('version', 'unknown')}")
+    print(f"  Deployed: {version.get('deployed', 'unknown')}")
+    print(f"  Notes: {version.get('notes', '')}")
+
+    # State
+    print(f"\n  Portfolio:")
+    paper = state.get("paper_usdt", 0)
+    peak = state.get("peak_value", 0)
+    inception = state.get("inception_value", 0)
+    latest_pnl = state.get("pnl_history", [])
+    current = latest_pnl[-1]["value"] if latest_pnl else paper
+    pnl_pct = (current / inception - 1) * 100 if inception else 0
+    dd_pct = (current / peak - 1) * 100 if peak else 0
+
+    print(f"    Paper USDT:    ${paper:,.2f}")
+    print(f"    Current value: ${current:,.2f}")
+    print(f"    Inception:     ${inception:,.2f}")
+    print(f"    Peak:          ${peak:,.2f}")
+    print(f"    PnL:           {pnl_pct:+.2f}%")
+    print(f"    Drawdown:      {dd_pct:+.2f}%")
+    print(f"    Rebal count:   {state.get('rebal_count', 0)}")
+    print(f"    Last rebal:    {state.get('last_rebal_ts', 'N/A')}")
+
+    # Circuit breaker
+    cb = state.get("circuit_breaker")
+    if cb:
+        print(f"    Circuit breaker: ACTIVE — {cb}")
+    else:
+        print(f"    Circuit breaker: OFF")
+
+    # Positions
+    positions = state.get("positions", {})
+    if positions:
+        print(f"\n  Open positions ({len(positions)}):")
+        for asset, pos in positions.items():
+            print(f"    {asset}: qty={pos.get('qty', 0)}, "
+                  f"entry={pos.get('entry_price', 0):.4f}")
+    else:
+        print(f"\n  Open positions: none")
+
+    # Backtest summary
+    if metrics.get("full_sample"):
+        fs = metrics["full_sample"]
+        print(f"\n  Backtest (full sample):")
+        print(f"    Sharpe:    {fs.get('sharpe', 0):.3f}")
+        print(f"    Sortino:   {fs.get('sortino', 0):.3f}")
+        print(f"    CAGR:      {fs.get('cagr_pct', 0):.2f}%")
+        print(f"    Max DD:    {fs.get('max_dd_pct', 0):.2f}%")
+        print(f"    Total ret: {fs.get('total_ret_pct', 0):.2f}%")
+        print(f"    Fee drag:  {fs.get('fee_drag_pct_yr', 0):.2f}%/yr")
+        print(f"    Avg hold:  {fs.get('avg_holding_hrs', 0):.1f}h")
+        print(f"    Turnover:  {fs.get('turnover_per_day', 0):.4f}/day")
+        print(f"    In regime: {fs.get('pct_time_in_regime', 0):.1f}%")
+
+    if metrics_v2.get("full_sample"):
+        fs2 = metrics_v2["full_sample"]
+        print(f"\n  Backtest v2 (full sample):")
+        print(f"    Sharpe:    {fs2.get('sharpe', 0):.3f}")
+        print(f"    Sortino:   {fs2.get('sortino', 0):.3f}")
+        print(f"    CAGR:      {fs2.get('cagr_pct', 0):.2f}%")
+        print(f"    Max DD:    {fs2.get('max_dd_pct', 0):.2f}%")
+        print(f"    Total ret: {fs2.get('total_ret_pct', 0):.2f}%")
+
+    print()
+
+
+def cmd_backtest(args):
+    """Detailed backtest metrics."""
+    metrics = load_json(METRICS_FILE)
+    metrics_v2 = load_json(METRICS_V2_FILE)
+
+    def print_bt_section(name, data):
+        if not data:
+            return
+        print(f"\n  {name}:")
+        print(f"    Bars:        {data.get('bars', 0):,}")
+        print(f"    Years:       {data.get('years', 0):.2f}")
+        print(f"    Sharpe:      {data.get('sharpe', 0):.3f}")
+        print(f"    Sortino:     {data.get('sortino', 0):.3f}")
+        print(f"    CAGR:        {data.get('cagr_pct', 0):.2f}%")
+        print(f"    Max DD:      {data.get('max_dd_pct', 0):.2f}%")
+        print(f"    Total ret:   {data.get('total_ret_pct', 0):.2f}%")
+        if "pct_time_invested" in data:
+            print(f"    Time invest: {data['pct_time_invested']:.1f}%")
+        if "fee_drag_pct_yr" in data:
+            print(f"    Fee drag:    {data['fee_drag_pct_yr']:.2f}%/yr")
+        if "avg_holding_hrs" in data:
+            print(f"    Avg hold:    {data['avg_holding_hrs']:.1f}h")
+        if "pct_time_in_regime" in data:
+            print(f"    In regime:   {data['pct_time_in_regime']:.1f}%")
+        if "turnover_per_day" in data:
+            print(f"    Turnover:    {data['turnover_per_day']:.4f}/day")
+
+    print(f"\n{'='*70}")
+    print(f"  BACKTEST METRICS (v1)")
+    print(f"{'='*70}")
+
+    for fold in metrics.get("fold_metrics", []):
+        print_bt_section(fold.get("label", "Unknown"), fold)
+
+    print_bt_section("Combined OOS", metrics.get("combined_oos"))
+    print_bt_section("Full Sample", metrics.get("full_sample"))
+    print_bt_section("No Regime Filter", metrics.get("no_regime"))
+
+    passed = metrics.get("passed")
+    print(f"\n  Passed: {passed}")
+
+    if metrics_v2:
+        print(f"\n{'='*70}")
+        print(f"  BACKTEST METRICS (v2)")
+        print(f"{'='*70}")
+        for fold in metrics_v2.get("fold_metrics", []):
+            print_bt_section(fold.get("label", "Unknown"), fold)
+        print_bt_section("Combined OOS", metrics_v2.get("combined_oos"))
+        print_bt_section("Full Sample", metrics_v2.get("full_sample"))
+        print_bt_section("No Regime Filter", metrics_v2.get("no_regime"))
+        print(f"\n  Passed: {metrics_v2.get('passed')}")
+
+    print()
+
+
+def cmd_regime(args):
+    """Regime filter analysis."""
+    metrics = load_json(METRICS_FILE)
+    metrics_v2 = load_json(METRICS_V2_FILE)
+    cfg = load_yaml(CONFIG_FILE)
+
+    print(f"\n{'='*70}")
+    print(f"  REGIME FILTER ANALYSIS")
+    print(f"{'='*70}")
+
+    regime_ma = cfg.get("regime_ma_bars", "N/A")
+    regime_buffer = cfg.get("regime_buffer", "N/A")
+    print(f"  Regime MA bars: {regime_ma} ({regime_ma / 24:.1f} days)")
+    print(f"  Hysteresis buffer: {regime_buffer} ({regime_buffer * 100:.1f}%)")
+
+    # Compare with/without regime
+    fs = metrics.get("full_sample", {})
+    nr = metrics.get("no_regime", {})
+
+    if fs and nr:
+        print(f"\n  Regime filter impact:")
+        print(f"    {'Metric':<20} {'With Regime':>12} {'No Regime':>12} {'Delta':>10}")
+        print(f"    {'-'*20} {'-'*12} {'-'*12} {'-'*10}")
+
+        for key in ["sharpe", "sortino", "cagr_pct", "max_dd_pct", "total_ret_pct"]:
+            with_val = fs.get(key, 0)
+            without_val = nr.get(key, 0)
+            delta = with_val - without_val
+            label = key.replace("_pct", "%").replace("_", " ").title()
+            print(f"    {label:<20} {with_val:>12.3f} {without_val:>12.3f} {delta:>+10.3f}")
+
+        print(f"\n    Time in regime: {fs.get('pct_time_in_regime', 0):.1f}%")
+
+    # State info
+    state = load_json(STATE_FILE)
+    last_regime = state.get("last_regime")
+    if last_regime:
+        print(f"\n  Last regime (from state): {last_regime}")
+
+    print()
+
+
+def cmd_sizing(args):
+    """Position sizing study results."""
+    sizing = load_json(SIZING_FILE)
+    if not sizing:
+        print(f"Error: {SIZING_FILE} not found")
+        sys.exit(1)
+
+    print(f"\n{'='*70}")
+    print(f"  POSITION SIZING STUDY")
+    print(f"{'='*70}")
+
+    cfg = sizing.get("config", {})
+    print(f"  Assets: {', '.join(cfg.get('assets', []))}")
+    print(f"  Leverage: {cfg.get('leverage', 'N/A')}x")
+    print(f"  Fee rate: {cfg.get('fee_rt', 0)*100:.2f}%")
+    print(f"  Top N: {cfg.get('top_n', 'N/A')}")
+    print(f"  Folds: {cfg.get('n_folds', 'N/A')}")
+
+    # Part 2a: Fixed position sizing
+    part2a = sizing.get("part_2a", [])
+    if part2a:
+        print(f"\n  Part 2a — Fixed Position Sizing:")
+        print(f"    {'Deploy%':>8} {'Total Dep':>10} {'Sharpe':>8} {'CAGR%':>8} "
+              f"{'Max DD%':>8} {'Warn%':>6} {'All Pos':>7}")
+        print(f"    {'-'*8} {'-'*10} {'-'*8} {'-'*8} {'-'*8} {'-'*6} {'-'*7}")
+
+        for row in part2a:
+            d_pct = row.get("d", 0) * 100
+            total = row.get("total_deploy", 0) * 100
+            print(f"    {d_pct:>7.0f}% {total:>9.0f}% {row.get('oos_sharpe', 0):>8.3f} "
+                  f"{row.get('oos_cagr', 0):>7.1f}% {row.get('max_dd', 0):>7.1f}% "
+                  f"{row.get('warn_pct', 0):>5.1f}% {'Yes' if row.get('folds_all_pos') else 'No':>7}")
+
+    # Part 2b: Volatility targeting
+    part2b = sizing.get("part_2b", [])
+    if part2b:
+        print(f"\n  Part 2b — Volatility Targeting:")
+        print(f"    {'Vol Target':>10} {'Sharpe':>8} {'CAGR%':>8} "
+              f"{'Max DD%':>8} {'All Pos':>7}")
+        print(f"    {'-'*10} {'-'*8} {'-'*8} {'-'*8} {'-'*7}")
+
+        for row in part2b:
+            vt = row.get("vol_target", 0) * 100
+            print(f"    {vt:>9.0f}% {row.get('oos_sharpe', 0):>8.3f} "
+                  f"{row.get('oos_cagr', 0):>7.1f}% {row.get('max_dd', 0):>7.1f}% "
+                  f"{'Yes' if row.get('folds_all_pos') else 'No':>7}")
+
+    print()
+
+
+def cmd_config(args):
+    """Momentum engine config."""
+    cfg = load_yaml(CONFIG_FILE)
+    cfg_v2 = load_yaml(CONFIG_V2_FILE)
+
+    def print_cfg(name, cfg):
+        if not cfg:
+            return
+        print(f"\n  {name}:")
+        for k, v in cfg.items():
+            if k in ("telegram_bot_token", "cdp_key_file"):
+                v_str = str(v)[:20] + "..." if v else "N/A"
+            else:
+                v_str = v
+            print(f"    {k}: {v_str}")
+
+    print(f"\n{'='*70}")
+    print(f"  MOMENTUM ENGINE CONFIG")
+    print(f"{'='*70}")
+
+    print_cfg("config.yaml", cfg)
+    print_cfg("config_v2.yaml", cfg_v2)
+
+    print()
+
+
+def cmd_version(args):
+    """Version + deployment info."""
+    version = load_json(VERSION_FILE)
+    state = load_json(STATE_FILE)
+
+    print(f"\n{'='*70}")
+    print(f"  VERSION & DEPLOYMENT")
+    print(f"{'='*70}")
+    print(f"  Version:     {version.get('version', 'unknown')}")
+    print(f"  Deployed:    {version.get('deployed', 'unknown')}")
+    print(f"  Notes:       {version.get('notes', '')}")
+    print(f"  Exchange:    {load_yaml(CONFIG_FILE).get('exchange', 'unknown')}")
+    print(f"  Paper mode:  {load_yaml(CONFIG_FILE).get('paper_mode', 'unknown')}")
+    print(f"  Rebal count: {state.get('rebal_count', 0)}")
+    print(f"  Last rebal:  {state.get('last_rebal_ts', 'N/A')}")
+    print()
+
+
+# ── Main ───────────────────────────────────────────────────────────────────────
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Cappuccino momentum engine inspection tool",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    sub.add_parser("overview", help="Engine status + backtest summary")
+    sub.add_parser("backtest", help="Detailed backtest metrics")
+    sub.add_parser("regime", help="Regime filter analysis")
+    sub.add_parser("sizing", help="Position sizing study results")
+    sub.add_parser("config", help="Momentum engine config")
+    sub.add_parser("version", help="Version + deployment info")
+
+    args = parser.parse_args()
+
+    cmds = {
+        "overview": cmd_overview,
+        "backtest": cmd_backtest,
+        "regime": cmd_regime,
+        "sizing": cmd_sizing,
+        "config": cmd_config,
+        "version": cmd_version,
+    }
+    cmds[args.command](args)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,28 @@
+exchange: coinbase
+cdp_key_file: ~/Downloads/cdp_api_key.json   # Coinbase CDP API key (JWT auth)
+portfolio_uuid: a56a58ba-5953-441f-ad81-3bf89c495249  # TestPortfolio
+paper_mode: false            # LIVE — Coinbase Advanced Trade
+capital_usdt: 500            # starting allocation (USD on Coinbase)
+max_position_pct: 0.25       # 25% per asset, 50% max deployed
+assets: [BTC, ETH, SOL, XRP, DOGE, ADA, AVAX, LINK, LTC, BCH, XLM, SUI, DOT, HBAR]
+fee_rate: 0.0020             # 0.20% taker RT (Coinbase Derivatives) — used in paper simulation
+
+# Signal parameters (must match backtest)
+lookback_bars: 24          # 24h momentum lookback
+top_n: 2                   # long top-N assets
+rebalance_interval_hours: 168   # weekly (7 days)
+regime_ma_bars: 168        # BTC 168h (7d) MA regime filter — sweep best result (Sharpe +1.279)
+regime_buffer: 0.005       # ±0.5% hysteresis band — prevents whipsawing around the MA
+
+# Risk circuit breakers
+max_drawdown_pct: 15.0     # halt if portfolio drawdown from peak exceeds 15%
+single_asset_drop_pct: 8.0 # close position if asset drops >8% in one hour
+max_consecutive_errors: 3  # halt after N ccxt errors in a row
+
+# Logging
+log_dir: logs              # relative to momentum/ dir
+state_file: state.json     # current positions, portfolio value
+
+# Alerting (Telegram) — leave blank to disable
+telegram_bot_token: "8773554936:AAH5zzE3NDpMH4LGGvq1WRiI8vgu_sHOwjU"
+telegram_chat_id: "8307572241"

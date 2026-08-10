@@ -1,0 +1,64 @@
+exchange: coinbase
+cdp_key_file: ~/Downloads/cdp_api_key.json   # Coinbase CDP API key (JWT auth)
+portfolio_uuid: a56a58ba-5953-441f-ad81-3bf89c495249  # TestPortfolio
+paper_mode: false            # LIVE — Coinbase Derivatives Futures
+capital_usdt: 500            # starting allocation (USD)
+max_position_pct: 0.25       # 25% per asset, 50% max deployed
+assets: [BTC, ETH, SOL, XRP, DOGE, ADA, LINK, LTC, BCH, XLM, SUI, DOT, HBAR]  # 13 assets — AVAX excluded (fee-economic: 0.51% RT T1 at $9.68, below $15 warning threshold)
+
+# Signal parameters (must match backtest_v2)
+lookback_bars: 24          # 24h momentum lookback
+top_n: 2                   # long top-N assets
+rebalance_interval_hours: 168   # weekly (7 days)
+regime_ma_bars: 168        # BTC 168h (7d) MA regime filter
+regime_buffer: 0.005       # ±0.5% hysteresis band
+
+# Risk circuit breakers
+max_drawdown_pct: 15.0     # halt if portfolio drawdown from peak exceeds 15%
+single_asset_drop_pct: 8.0 # close position if asset drops >8% in one hour
+max_consecutive_errors: 3  # halt after N ccxt errors in a row
+
+# Logging
+log_dir: logs
+state_file: state.json
+
+# Alerting (Telegram)
+telegram_bot_token: "8773554936:AAH5zzE3NDpMH4LGGvq1WRiI8vgu_sHOwjU"
+telegram_chat_id: "8307572241"
+
+# ── Fee model (Coinbase Derivatives Futures) ──────────────────────────────────
+# NFA fee: $0.30 per contract round-trip (FIXED — does not scale with volume)
+# Taker fee: percentage of notional, varies by 30-day volume tier
+# RT fee = (taker_per_side * 2) + (0.30 / contract_notional_usd)
+# Computed dynamically at each bar — NFA% shifts as prices move
+fee_model:
+  nfa_per_contract_rt: 0.30   # USD per contract, round-trip
+  fee_tier: 1                  # 1 = <$1K 30d vol (most conservative / highest fees)
+  taker_per_side_pct_by_tier:  # values in PERCENT (divided by 100 in code)
+    1:  0.100   # <$1K
+    2:  0.090   # $1K–$10K
+    3:  0.080   # $10K–$50K
+    4:  0.070   # $50K–$500K
+    5:  0.060   # $500K–$1M
+    6:  0.050   # $1M–$15M
+    7:  0.040   # $15M–$50M
+    8:  0.030   # $50M–$100M
+    9:  0.020   # $100M–$250M
+    10: 0.010   # $250M+
+
+# ── Contract specifications (Coinbase Derivatives) ────────────────────────────
+contract_specs:
+  BTC:  {size: 0.01}     # 0.01 BTC per contract
+  ETH:  {size: 0.1}      # 0.1  ETH per contract
+  SOL:  {size: 5}        # 5    SOL per contract
+  XRP:  {size: 500}      # 500  XRP per contract
+  DOGE: {size: 5000}     # 5000 DOGE per contract
+  ADA:  {size: 1000}     # 1000 ADA per contract
+  AVAX: {size: 10}       # 10   AVAX per contract
+  LINK: {size: 50}       # 50   LINK per contract
+  LTC:  {size: 5}        # 5    LTC per contract
+  BCH:  {size: 1}        # 1    BCH per contract
+  XLM:  {size: 5000}     # 5000 XLM per contract
+  SUI:  {size: 500}      # 500  SUI per contract
+  DOT:  {size: 100}      # 100  DOT per contract
+  HBAR: {size: 5000}     # 5000 HBAR per contract

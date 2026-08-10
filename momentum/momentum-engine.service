@@ -1,0 +1,20 @@
+[Unit]
+Description=Cappuccino Momentum Trading Engine
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=mrc
+WorkingDirectory=/home/mrc/cappuccino/momentum
+ExecStart=/opt/miniconda3/bin/python3 engine.py
+Restart=on-failure
+RestartSec=30
+StartLimitIntervalSec=120
+StartLimitBurst=3
+StandardOutput=journal
+StandardError=journal
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

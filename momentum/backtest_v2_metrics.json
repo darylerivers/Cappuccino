@@ -1,0 +1,96 @@
+{
+  "fold_metrics": [
+    {
+      "label": "Fold 1",
+      "bars": 2291,
+      "years": 0.26,
+      "sharpe": 0.889,
+      "sortino": 0.895,
+      "cagr_pct": 29.03,
+      "max_dd_pct": -16.11,
+      "total_ret_pct": 6.89
+    },
+    {
+      "label": "Fold 2",
+      "bars": 2291,
+      "years": 0.26,
+      "sharpe": 0.129,
+      "sortino": 0.121,
+      "cagr_pct": 0.47,
+      "max_dd_pct": -11.72,
+      "total_ret_pct": 0.12
+    },
+    {
+      "label": "Fold 3",
+      "bars": 2291,
+      "years": 0.26,
+      "sharpe": 1.248,
+      "sortino": 1.561,
+      "cagr_pct": 56.01,
+      "max_dd_pct": -18.5,
+      "total_ret_pct": 12.33
+    },
+    {
+      "label": "Fold 4",
+      "bars": 2291,
+      "years": 0.26,
+      "sharpe": 0.43,
+      "sortino": 0.43,
+      "cagr_pct": 8.84,
+      "max_dd_pct": -12.98,
+      "total_ret_pct": 2.24
+    },
+    {
+      "label": "Fold 5",
+      "bars": 2291,
+      "years": 0.26,
+      "sharpe": -3.757,
+      "sortino": -2.978,
+      "cagr_pct": -50.19,
+      "max_dd_pct": -20.62,
+      "total_ret_pct": -16.66
+    }
+  ],
+  "combined_oos": {
+    "label": "Combined OOS",
+    "bars": 11455,
+    "years": 1.31,
+    "sharpe": 0.212,
+    "sortino": 0.216,
+    "cagr_pct": 1.86,
+    "max_dd_pct": -29.84,
+    "total_ret_pct": 2.44
+  },
+  "full_sample": {
+    "label": "Full sample",
+    "bars": 12131,
+    "years": 1.38,
+    "sharpe": 0.79,
+    "sortino": 0.697,
+    "cagr_pct": 22.32,
+    "max_dd_pct": -32.0,
+    "total_ret_pct": 32.17,
+    "pct_time_invested": 48.4,
+    "turnover_per_day": 0.1976,
+    "fee_drag_pct_yr": 15.2196,
+    "avg_holding_hrs": 59.2,
+    "pct_time_in_regime": 51.2,
+    "avax_avg_fee_rt_pct": null,
+    "dispersion_filtered_pct": 0.0,
+    "corr_filtered_pct": 8.2,
+    "ret7d_flat_pct": 0.0,
+    "ret7d_partial_pct": 0.0
+  },
+  "no_regime": {
+    "label": "No regime filter",
+    "bars": 12131,
+    "years": 1.38,
+    "sharpe": 0.566,
+    "sortino": 0.661,
+    "cagr_pct": 16.62,
+    "max_dd_pct": -43.78,
+    "total_ret_pct": 23.72
+  },
+  "passed": "False",
+  "fee_tier": 1
+}

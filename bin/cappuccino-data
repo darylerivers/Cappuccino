@@ -1,0 +1,387 @@
+#!/usr/bin/env python3
+"""
+cappuccino-data — Inspect OHLCV data files and data pipeline health.
+
+Usage:
+    cappuccino-data overview          # All data files + pipeline status
+    cappuccino-data show <ASSET>      # Show specific asset data stats
+    cappuccino-data compare           # Compare all assets side-by-side
+    cappuccino-data pipeline          # Data pipeline collector status
+    cappuccino-data features          # Exported feature summary
+    cappuccino-data freshness         # How fresh is each data file?
+"""
+
+import argparse
+import json
+import os
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+import pandas as pd
+
+# ── Paths ──────────────────────────────────────────────────────────────────────
+BASE = Path.home() / "cappuccino"
+DATA_DIR = BASE / "data"
+PIPELINE_DIR = BASE / "data_pipeline"
+EXPORTS_DIR = PIPELINE_DIR / "exports"
+COLLECTOR_LOG = PIPELINE_DIR / "collector.log"
+COLLECTOR_CONFIG = PIPELINE_DIR / "collector_config.json"
+
+
+def load_parquet_stats(path: Path) -> dict:
+    """Get stats from a parquet file without loading all data."""
+    df = pd.read_parquet(path)
+    return {
+        "rows": len(df),
+        "columns": list(df.columns),
+        "start": df["datetime"].iloc[0] if "datetime" in df.columns else "N/A",
+        "end": df["datetime"].iloc[-1] if "datetime" in df.columns else "N/A",
+        "latest_close": round(df["close"].iloc[-1], 4) if "close" in df.columns else None,
+        "latest_volume": round(df["volume"].iloc[-1], 4) if "volume" in df.columns else None,
+        "ohlc_range": (
+            f"{df['low'].min():.2f} — {df['high'].max():.2f}"
+            if all(c in df.columns for c in ["low", "high"])
+            else "N/A"
+        ),
+        "avg_volume": round(df["volume"].mean(), 4) if "volume" in df.columns else None,
+        "missing_pct": round(df.isnull().sum().sum() / (len(df) * len(df.columns)) * 100, 2),
+    }
+
+
+def get_parquet_files() -> list[Path]:
+    return sorted(DATA_DIR.glob("*_1h.parquet"))
+
+
+def parse_asset_name(path: Path) -> str:
+    return path.stem.replace("_1h", "")
+
+
+# ── Commands ───────────────────────────────────────────────────────────────────
+
+def cmd_overview(args):
+    """Show all data files + pipeline status."""
+    files = get_parquet_files()
+    if not files:
+        print("No parquet files found in", DATA_DIR)
+        return
+
+    print(f"\n{'='*70}")
+    print(f"  CAPPUCCINO DATA OVERVIEW")
+    print(f"{'='*70}")
+    print(f"  Data directory: {DATA_DIR}")
+    print(f"  Parquet files:  {len(files)}")
+    print(f"  Pipeline dir:   {PIPELINE_DIR}")
+    print()
+
+    # Table header
+    print(f"  {'Asset':<8} {'Rows':>8} {'Start':>12} {'End':>12} {'Latest $':>10} {'Missing%':>9}")
+    print(f"  {'-'*8} {'-'*8} {'-'*12} {'-'*12} {'-'*10} {'-'*9}")
+
+    total_rows = 0
+    for f in files:
+        asset = parse_asset_name(f)
+        stats = load_parquet_stats(f)
+        total_rows += stats["rows"]
+        start_str = str(stats["start"])[:10] if stats["start"] != "N/A" else "N/A"
+        end_str = str(stats["end"])[:10] if stats["end"] != "N/A" else "N/A"
+        latest = f"${stats['latest_close']:,.2f}" if stats["latest_close"] else "N/A"
+        print(f"  {asset:<8} {stats['rows']:>8,} {start_str:>12} {end_str:>12} {latest:>10} {stats['missing_pct']:>8.2f}%")
+
+    print(f"  {'-'*8} {'-'*8} {'-'*12} {'-'*12} {'-'*10} {'-'*9}")
+    print(f"  {'TOTAL':<8} {total_rows:>8,}")
+
+    # Pipeline status
+    print(f"\n  {'='*70}")
+    print(f"  DATA PIPELINE")
+    print(f"{'='*70}")
+
+    # Collector config
+    if COLLECTOR_CONFIG.exists():
+        cfg = json.loads(COLLECTOR_CONFIG.read_text())
+        print(f"  Config: {COLLECTOR_CONFIG.name}")
+        print(f"  API: Coinalyze (key: {cfg.get('coinalyze_api_key', 'N/A')[:8]}...)")
+
+    # Collector log
+    if COLLECTOR_LOG.exists():
+        lines = COLLECTOR_LOG.read_text().strip().split("\n")
+        print(f"  Log: {len(lines)} lines, last: {lines[-1][:100]}")
+    else:
+        print(f"  Log: not found")
+
+    # Exports
+    if EXPORTS_DIR.exists():
+        exports = list(EXPORTS_DIR.glob("*.parquet"))
+        print(f"  Exports: {len(exports)} feature parquet files")
+    else:
+        print(f"  Exports: directory not found")
+
+    # Services
+    for svc in ["binance-collector", "okx-collector"]:
+        svc_file = PIPELINE_DIR / f"{svc}.service"
+        status = "exists" if svc_file.exists() else "missing"
+        print(f"  {svc}.service: {status}")
+
+    print()
+
+
+def cmd_show(args):
+    """Show detailed stats for a specific asset."""
+    asset = args.asset.upper()
+    path = DATA_DIR / f"{asset}_1h.parquet"
+    if not path.exists():
+        print(f"Error: {path} not found")
+        print(f"Available: {[parse_asset_name(f) for f in get_parquet_files()]}")
+        sys.exit(1)
+
+    df = pd.read_parquet(path)
+    stats = load_parquet_stats(path)
+
+    print(f"\n{'='*70}")
+    print(f"  {asset} DATA DETAILS")
+    print(f"{'='*70}")
+    print(f"  File: {path}")
+    print(f"  Rows: {stats['rows']:,}")
+    print(f"  Columns: {', '.join(stats['columns'])}")
+    print(f"  Date range: {stats['start']} → {stats['end']}")
+    print(f"  Latest close: ${stats['latest_close']:,.2f}")
+    print(f"  OHLC range: {stats['ohlc_range']}")
+    print(f"  Avg volume: {stats['avg_volume']:,.4f}")
+    print(f"  Missing data: {stats['missing_pct']:.2f}%")
+
+    # Recent candles
+    print(f"\n  Last 5 candles:")
+    recent = df.tail(5)
+    for _, row in recent.iterrows():
+        dt = str(row.get("datetime", row.get("timestamp", "")))[:19]
+        print(f"    {dt}  O:{row['open']:>10.2f}  H:{row['high']:>10.2f}  "
+              f"L:{row['low']:>10.2f}  C:{row['close']:>10.2f}  V:{row['volume']:>12.4f}")
+
+    # Basic stats
+    print(f"\n  Price statistics:")
+    for col in ["open", "high", "low", "close", "volume"]:
+        if col in df.columns:
+            s = df[col]
+            print(f"    {col:>6}: mean={s.mean():>12.2f}  std={s.std():>12.2f}  "
+                  f"min={s.min():>12.2f}  max={s.max():>12.2f}")
+
+    print()
+
+
+def cmd_compare(args):
+    """Compare all assets side-by-side."""
+    files = get_parquet_files()
+    if not files:
+        print("No parquet files found")
+        return
+
+    rows = []
+    for f in files:
+        asset = parse_asset_name(f)
+        df = pd.read_parquet(f)
+        stats = load_parquet_stats(f)
+        rows.append({
+            "Asset": asset,
+            "Rows": stats["rows"],
+            "Latest $": stats["latest_close"],
+            "Avg Vol": stats["avg_volume"],
+            "Missing%": stats["missing_pct"],
+            "Volatility": round(df["close"].pct_change().std() * 100, 3) if len(df) > 1 else 0,
+        })
+
+    comp = pd.DataFrame(rows)
+    comp = comp.sort_values("Volatility", ascending=False)
+
+    print(f"\n{'='*80}")
+    print(f"  ASSET COMPARISON (sorted by volatility)")
+    print(f"{'='*80}")
+    print(f"  {'Asset':<8} {'Rows':>8} {'Latest $':>10} {'Avg Vol':>12} "
+          f"{'Volatility%':>12} {'Missing%':>9}")
+    print(f"  {'-'*8} {'-'*8} {'-'*10} {'-'*12} {'-'*12} {'-'*9}")
+
+    for _, r in comp.iterrows():
+        latest = f"${r['Latest $']:,.2f}" if r["Latest $"] else "N/A"
+        print(f"  {r['Asset']:<8} {r['Rows']:>8,} {latest:>10} "
+              f"{r['Avg Vol']:>12.4f} {r['Volatility']:>11.3f}% "
+              f"{r['Missing%']:>8.2f}%")
+    print()
+
+
+def cmd_pipeline(args):
+    """Data pipeline collector status."""
+    print(f"\n{'='*70}")
+    print(f"  DATA PIPELINE STATUS")
+    print(f"{'='*70}")
+
+    # Check collector processes
+    import subprocess
+    for name in ["collector.py", "binance-collector", "okx-collector"]:
+        try:
+            out = subprocess.check_output(
+                ["pgrep", "-f", name], stderr=subprocess.DEVNULL
+            ).decode().strip()
+            pids = [int(p) for p in out.split() if p.isdigit()]
+            status = f"RUNNING (PID: {', '.join(str(p) for p in pids)})" if pids else "NOT RUNNING"
+        except subprocess.CalledProcessError:
+            status = "NOT RUNNING"
+        print(f"  {name:<25} {status}")
+
+    # Log analysis
+    if COLLECTOR_LOG.exists():
+        log_text = COLLECTOR_LOG.read_text()
+        lines = log_text.strip().split("\n")
+        print(f"\n  Log file: {len(lines)} lines")
+
+        # Count errors
+        errors = [l for l in lines if "error" in l.lower() or "exception" in l.lower()]
+        print(f"  Error lines: {len(errors)}")
+        if errors:
+            print(f"  Last error: {errors[-1][:120]}")
+
+        # Last 3 lines
+        print(f"\n  Last 3 log lines:")
+        for line in lines[-3:]:
+            print(f"    {line[:120]}")
+    else:
+        print(f"  Log file: not found ({COLLECTOR_LOG})")
+
+    # Database files
+    for db_name in ["binance_features.db", "okx_features.db"]:
+        db_path = PIPELINE_DIR / db_name
+        if db_path.exists():
+            size_mb = db_path.stat().st_size / (1024 * 1024)
+            print(f"  {db_name:<25} {size_mb:.1f} MB")
+        else:
+            print(f"  {db_name:<25} not found")
+
+    # Exports
+    if EXPORTS_DIR.exists():
+        exports = sorted(EXPORTS_DIR.glob("*.parquet"))
+        print(f"\n  Exported features: {len(exports)} files")
+        for exp in exports[-5:]:
+            size_kb = exp.stat().st_size / 1024
+            print(f"    {exp.name:<40} {size_kb:>8.1f} KB")
+        if len(exports) > 5:
+            print(f"    ... and {len(exports) - 5} more")
+    else:
+        print(f"  Exports dir: not found")
+
+    print()
+
+
+def cmd_features(args):
+    """Show exported feature summary."""
+    if not EXPORTS_DIR.exists():
+        print(f"Exports directory not found: {EXPORTS_DIR}")
+        return
+
+    exports = sorted(EXPORTS_DIR.glob("*.parquet"))
+    if not exports:
+        print("No exported feature files found")
+        return
+
+    print(f"\n{'='*70}")
+    print(f"  EXPORTED FEATURES")
+    print(f"{'='*70}")
+    print(f"  Directory: {EXPORTS_DIR}")
+    print(f"  Files: {len(exports)}")
+    print()
+
+    print(f"  {'File':<45} {'Rows':>8} {'Cols':>6} {'Size':>8}")
+    print(f"  {'-'*45} {'-'*8} {'-'*6} {'-'*8}")
+
+    for exp in exports:
+        try:
+            df = pd.read_parquet(exp)
+            size_kb = exp.stat().st_size / 1024
+            print(f"  {exp.name:<45} {len(df):>8,} {len(df.columns):>6} "
+                  f"{size_kb:>7.1f}KB")
+        except Exception as e:
+            print(f"  {exp.name:<45} ERROR: {e}")
+
+    print()
+
+
+def cmd_freshness(args):
+    """Check how fresh each data file is."""
+    files = get_parquet_files()
+    if not files:
+        print("No parquet files found")
+        return
+
+    now = datetime.now(timezone.utc)
+
+    print(f"\n{'='*70}")
+    print(f"  DATA FRESHNESS (as of {now.strftime('%Y-%m-%d %H:%M UTC')})")
+    print(f"{'='*70}")
+    print(f"  {'Asset':<8} {'File Age':>12} {'Data End':>20} {'Gap Hours':>10} {'Status':>10}")
+    print(f"  {'-'*8} {'-'*12} {'-'*20} {'-'*10} {'-'*10}")
+
+    for f in files:
+        asset = parse_asset_name(f)
+        df = pd.read_parquet(f)
+
+        # File modification time
+        file_mtime = datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc)
+        file_age_h = (now - file_mtime).total_seconds() / 3600
+
+        # Latest data timestamp
+        if "datetime" in df.columns:
+            data_end = pd.Timestamp(df["datetime"].iloc[-1])
+            if data_end.tzinfo is None:
+                data_end = data_end.tz_localize("UTC")
+            gap_h = (now - data_end).total_seconds() / 3600
+            data_end_str = str(data_end)[:19]
+        else:
+            gap_h = -1
+            data_end_str = "N/A"
+
+        if gap_h < 2:
+            status = "FRESH"
+        elif gap_h < 24:
+            status = "OK"
+        elif gap_h < 72:
+            status = "STALE"
+        else:
+            status = "OLD"
+
+        print(f"  {asset:<8} {file_age_h:>11.1f}h {data_end_str:>20} "
+              f"{gap_h:>9.1f}h {status:>10}")
+
+    print()
+
+
+# ── Main ───────────────────────────────────────────────────────────────────────
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Cappuccino data inspection tool",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__,
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    sub.add_parser("overview", help="All data files + pipeline status")
+    sub.add_parser("compare", help="Compare all assets side-by-side")
+    sub.add_parser("pipeline", help="Data pipeline collector status")
+    sub.add_parser("features", help="Exported feature summary")
+    sub.add_parser("freshness", help="How fresh is each data file?")
+
+    p_show = sub.add_parser("show", help="Show specific asset data stats")
+    p_show.add_argument("asset", help="Asset symbol (e.g. BTC, ETH)")
+
+    args = parser.parse_args()
+
+    cmds = {
+        "overview": cmd_overview,
+        "show": cmd_show,
+        "compare": cmd_compare,
+        "pipeline": cmd_pipeline,
+        "features": cmd_features,
+        "freshness": cmd_freshness,
+    }
+    cmds[args.command](args)
+
+
+if __name__ == "__main__":
+    main()

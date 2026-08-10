@@ -1,0 +1,5 @@
+{
+  "version": "1.0.0",
+  "deployed": "2026-03-25",
+  "notes": "Live on Coinbase, 168h MA regime filter, vol-scaled weights, Binance derivative signals"
+}

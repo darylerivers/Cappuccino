@@ -1,0 +1,29 @@
+assets: [BTC, ETH, DOGE, ADA, SOL]
+target: next_bar_direction
+lookback_bars: 168        # 7 days of hourly context features
+auc_threshold: 0.52
+accuracy_threshold: 0.52
+model_dir: results/models/
+feature_parquet_dir: ~/cappuccino/data_pipeline/exports/
+
+# OHLCV data source (one parquet per asset)
+ohlcv_dir: ~/cappuccino/data/
+
+# Walk-forward fold definition (months into 28-month dataset)
+folds:
+  - {train_end: 10, test_start: 10, test_end: 14}   # fold 1
+  - {train_end: 18, test_start: 18, test_end: 22}   # fold 2
+  - {train_end: 24, test_start: 24, test_end: 28}   # fold 3
+
+# XGBoost hyperparameters
+xgb:
+  n_estimators: 500
+  max_depth: 4
+  learning_rate: 0.05
+  subsample: 0.8
+  colsample_bytree: 0.8
+  min_child_weight: 5
+  early_stopping_rounds: 50
+  eval_metric: auc
+  use_label_encoder: false
+  random_state: 42

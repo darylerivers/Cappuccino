@@ -1,0 +1,43 @@
+[Unit]
+Description=OKX Data Pipeline Collector (Cappuccino)
+Documentation=https://github.com/youruser/cappuccino
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=mrc
+Group=mrc
+WorkingDirectory=/home/mrc/cappuccino/data_pipeline
+
+# Use the conda/venv Python that has aiohttp, websockets, etc.
+ExecStart=/opt/miniconda3/bin/python3 /home/mrc/cappuccino/data_pipeline/collector.py
+
+# Restart on failure, but not if we exit cleanly (exit code 0)
+Restart=on-failure
+RestartSec=15s
+
+# Give the process time to shut down gracefully (flush DB writes)
+TimeoutStopSec=30
+KillMode=control-group
+KillSignal=SIGTERM
+
+# Logging — journald captures stdout/stderr; also see collector.log
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=cappuccino-collector
+
+# Environment — adjust path if using a venv instead of conda
+Environment="PATH=/opt/miniconda3/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONUNBUFFERED=1"
+
+# Hardening (light — remove if causing issues)
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=false
+ReadWritePaths=/home/mrc/cappuccino/data_pipeline
+
+[Install]
+WantedBy=multi-user.target

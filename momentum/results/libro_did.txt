@@ -1,0 +1,11 @@
+LIBRO DiD Regression Results
+========================================
+  const                -0.011004
+  libro                0.0
+  bull                 0.051644
+  libro_x_bull         -0.0
+  p_libro              1.0
+  p_bull               0.0021
+  p_interaction        1.0
+  r_squared            0.0776
+  n_obs                240

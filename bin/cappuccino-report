@@ -1,0 +1,341 @@
+#!/usr/bin/env python3
+"""
+cappuccino-report — Generate unified performance reports across all subsystems.
+
+Usage:
+    cappuccino-report generate          # Full report (all subsystems)
+    cappuccino-report data              # Data subsystem report
+    cappuccino-report models            # XGBoost model report
+    cappuccino-report momentum          # Momentum engine report
+    cappuccino-report portfolio         # Portfolio report
+    cappuccino-report save <FILE>       # Save report to file
+"""
+
+import argparse
+import json
+import sqlite3
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+import pandas as pd
+
+# ── Paths ──────────────────────────────────────────────────────────────────────
+BASE = Path.home() / "cappuccino"
+DATA_DIR = BASE / "data"
+XGB_DIR = BASE / "xgboost"
+MOM_DIR = BASE / "momentum"
+PIPELINE_DIR = BASE / "data_pipeline"
+
+STATE_FILE = MOM_DIR / "state.json"
+AUDIT_DB = MOM_DIR / "audit.db"
+METRICS_FILE = MOM_DIR / "backtest_metrics.json"
+XGB_METRICS = XGB_DIR / "results" / "metrics.json"
+VERSION_FILE = MOM_DIR / "version.json"
+CONFIG_FILE = MOM_DIR / "config.yaml"
+
+
+def load_json(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+
+def load_yaml(path: Path) -> dict:
+    try:
+        import yaml
+        return yaml.safe_load(path.read_text()) or {}
+    except Exception:
+        return {}
+
+
+# ── Report generators ─────────────────────────────────────────────────────────
+
+def gen_data_report() -> str:
+    """Generate data subsystem report."""
+    lines = []
+    lines.append("=" * 70)
+    lines.append("DATA SUBSYSTEM REPORT")
+    lines.append("=" * 70)
+
+    files = sorted(DATA_DIR.glob("*_1h.parquet"))
+    lines.append(f"Parquet files: {len(files)}")
+
+    total_rows = 0
+    for f in files:
+        asset = f.stem.replace("_1h", "")
+        df = pd.read_parquet(f)
+        total_rows += len(df)
+        latest = df["close"].iloc[-1] if "close" in df.columns else 0
+        end = df["datetime"].iloc[-1] if "datetime" in df.columns else "N/A"
+        missing = df.isnull().sum().sum() / (len(df) * len(df.columns)) * 100
+        lines.append(f"  {asset:6s}: {len(df):>7,} rows, latest=${latest:,.2f}, "
+                     f"end={str(end)[:10]}, missing={missing:.2f}%")
+
+    lines.append(f"Total rows: {total_rows:,}")
+    lines.append("")
+
+    # Pipeline
+    collector_log = PIPELINE_DIR / "collector.log"
+    if collector_log.exists():
+        log_lines = collector_log.read_text().strip().split("\n")
+        errors = sum(1 for l in log_lines if "error" in l.lower())
+        lines.append(f"Collector log: {len(log_lines)} lines, {errors} errors")
+
+    exports = list((PIPELINE_DIR / "exports").glob("*.parquet")) if (PIPELINE_DIR / "exports").exists() else []
+    lines.append(f"Exported features: {len(exports)} files")
+    lines.append("")
+
+    return "\n".join(lines)
+
+
+def gen_models_report() -> str:
+    """Generate XGBoost model report."""
+    lines = []
+    lines.append("=" * 70)
+    lines.append("XGBOOST MODEL REPORT")
+    lines.append("=" * 70)
+
+    m = load_json(XGB_METRICS)
+    if not m:
+        lines.append("No metrics found")
+        return "\n".join(lines)
+
+    lines.append(f"Timestamp: {m.get('timestamp', 'N/A')}")
+    lines.append(f"Verdict:   {m.get('verdict', 'N/A')}")
+    lines.append(f"Combined OOS AUC:      {m.get('combined_oos_auc', 0):.4f}")
+    lines.append(f"Combined OOS Accuracy: {m.get('combined_oos_accuracy', 0):.4f}")
+    lines.append("")
+
+    per_asset = m.get("per_asset", {})
+    for asset in sorted(per_asset.keys()):
+        folds = per_asset[asset]
+        avg_auc = sum(f["auc"] for f in folds) / len(folds)
+        avg_acc = sum(f["accuracy"] for f in folds) / len(folds)
+        lines.append(f"  {asset}: avg AUC={avg_auc:.4f}, avg Acc={avg_acc:.4f}, "
+                     f"{len(folds)} folds")
+        for fold in folds:
+            lines.append(f"    Fold {fold['fold']}: AUC={fold['auc']:.4f}, "
+                         f"Acc={fold['accuracy']:.4f}, "
+                         f"Prec={fold['precision']:.4f}, "
+                         f"Rec={fold['recall']:.4f}")
+
+    lines.append("")
+    return "\n".join(lines)
+
+
+def gen_momentum_report() -> str:
+    """Generate momentum engine report."""
+    lines = []
+    lines.append("=" * 70)
+    lines.append("MOMENTUM ENGINE REPORT")
+    lines.append("=" * 70)
+
+    version = load_json(VERSION_FILE)
+    lines.append(f"Version:  {version.get('version', 'unknown')}")
+    lines.append(f"Deployed: {version.get('deployed', 'unknown')}")
+    lines.append(f"Notes:    {version.get('notes', '')}")
+    lines.append("")
+
+    metrics = load_json(METRICS_FILE)
+    fs = metrics.get("full_sample", {})
+    if fs:
+        lines.append("Full Sample Performance:")
+        lines.append(f"  Sharpe:     {fs.get('sharpe', 0):.3f}")
+        lines.append(f"  Sortino:    {fs.get('sortino', 0):.3f}")
+        lines.append(f"  CAGR:       {fs.get('cagr_pct', 0):.2f}%")
+        lines.append(f"  Max DD:     {fs.get('max_dd_pct', 0):.2f}%")
+        lines.append(f"  Total ret:  {fs.get('total_ret_pct', 0):.2f}%")
+        lines.append(f"  Fee drag:   {fs.get('fee_drag_pct_yr', 0):.2f}%/yr")
+        lines.append(f"  Turnover:   {fs.get('turnover_per_day', 0):.4f}/day")
+        lines.append(f"  Avg hold:   {fs.get('avg_holding_hrs', 0):.1f}h")
+        lines.append(f"  In regime:  {fs.get('pct_time_in_regime', 0):.1f}%")
+        lines.append("")
+
+    # Regime comparison
+    nr = metrics.get("no_regime", {})
+    if fs and nr:
+        lines.append("Regime filter impact:")
+        for key in ["sharpe", "cagr_pct", "max_dd_pct"]:
+            with_v = fs.get(key, 0)
+            without_v = nr.get(key, 0)
+            delta = with_v - without_v
+            label = key.replace("_pct", "%").title()
+            lines.append(f"  {label}: {with_v:.3f} → {without_v:.3f} (delta: {delta:+.3f})")
+        lines.append("")
+
+    # Sizing study
+    sizing = load_json(MOM_DIR / "results" / "sizing_study.json")
+    if sizing.get("part_2a"):
+        lines.append("Sizing study (fixed):")
+        for row in sizing["part_2a"]:
+            lines.append(f"  Deploy {row['total_deploy']*100:.0f}%: "
+                         f"Sharpe={row['oos_sharpe']:.3f}, "
+                         f"CAGR={row['oos_cagr']:.1f}%, "
+                         f"MaxDD={row['max_dd']:.1f}%")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def gen_portfolio_report() -> str:
+    """Generate portfolio report."""
+    lines = []
+    lines.append("=" * 70)
+    lines.append("PORTFOLIO REPORT")
+    lines.append("=" * 70)
+
+    state = load_json(STATE_FILE)
+    cfg = load_yaml(CONFIG_FILE)
+
+    pnl_hist = state.get("pnl_history", [])
+    inception = float(state.get("inception_value") or cfg.get("capital_usdt", 500))
+    peak = float(state.get("peak_value") or inception)
+    current = float(pnl_hist[-1]["value"]) if pnl_hist else inception
+    pnl_pct = (current / inception - 1) * 100 if inception else 0
+    dd_pct = (current / peak - 1) * 100 if peak else 0
+
+    lines.append(f"Exchange:      {cfg.get('exchange', 'unknown')}")
+    lines.append(f"Paper mode:    {cfg.get('paper_mode', 'unknown')}")
+    lines.append(f"Inception:     ${inception:,.2f}")
+    lines.append(f"Current:       ${current:,.2f} ({pnl_pct:+.2f}%)")
+    lines.append(f"Peak:          ${peak:,.2f}")
+    lines.append(f"Drawdown:      {dd_pct:+.2f}%")
+    lines.append(f"Rebal count:   {state.get('rebal_count', 0)}")
+    lines.append(f"Last rebal:    {state.get('last_rebal_ts', 'N/A')}")
+
+    cb = state.get("circuit_breaker")
+    if cb:
+        lines.append(f"Circuit breaker: ACTIVE — {cb}")
+    else:
+        lines.append(f"Circuit breaker: OFF")
+
+    positions = state.get("positions", {})
+    lines.append(f"Open positions: {len(positions)}")
+    for asset, pos in positions.items():
+        lines.append(f"  {asset}: {pos}")
+
+    # PnL trend (last 10)
+    if pnl_hist:
+        lines.append("")
+        lines.append("Recent PnL:")
+        for entry in pnl_hist[-10:]:
+            val = float(entry["value"])
+            pnl = (val / inception - 1) * 100
+            lines.append(f"  {entry['ts'][:19]}  ${val:,.2f} ({pnl:+.2f}%)")
+
+    # Audit stats
+    if AUDIT_DB.exists():
+        conn = sqlite3.connect(str(AUDIT_DB))
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM snapshots")
+        snaps = cur.fetchone()[0]
+        cur.execute("SELECT COUNT(*) FROM trades")
+        trades = cur.fetchone()[0]
+        cur.execute("SELECT COUNT(*) FROM events")
+        events = cur.fetchone()[0]
+        conn.close()
+        lines.append("")
+        lines.append(f"Audit: {snaps} snapshots, {trades} trades, {events:,} events")
+
+    lines.append("")
+    return "\n".join(lines)
+
+
+# ── Commands ───────────────────────────────────────────────────────────────────
+
+def cmd_generate(args):
+    """Full report (all subsystems)."""
+    report = []
+    report.append(f"CAPPUCCINO UNIFIED REPORT")
+    report.append(f"Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
+    report.append("")
+
+    report.append(gen_data_report())
+    report.append("")
+    report.append(gen_models_report())
+    report.append("")
+    report.append(gen_momentum_report())
+    report.append("")
+    report.append(gen_portfolio_report())
+
+    output = "\n".join(report)
+    print(output)
+
+
+def cmd_data(args):
+    """Data subsystem report."""
+    print(gen_data_report())
+
+
+def cmd_models(args):
+    """XGBoost model report."""
+    print(gen_models_report())
+
+
+def cmd_momentum(args):
+    """Momentum engine report."""
+    print(gen_momentum_report())
+
+
+def cmd_portfolio(args):
+    """Portfolio report."""
+    print(gen_portfolio_report())
+
+
+def cmd_save(args):
+    """Save report to file."""
+    filepath = Path(args.file)
+
+    report = []
+    report.append(f"CAPPUCCINO UNIFIED REPORT")
+    report.append(f"Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
+    report.append("")
+    report.append(gen_data_report())
+    report.append("")
+    report.append(gen_models_report())
+    report.append("")
+    report.append(gen_momentum_report())
+    report.append("")
+    report.append(gen_portfolio_report())
+
+    filepath.write_text("\n".join(report))
+    print(f"Report saved to {filepath}")
+
+
+# ── Main ───────────────────────────────────────────────────────────────────────
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Cappuccino unified report generator",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    sub.add_parser("generate", help="Full report (all subsystems)")
+    sub.add_parser("data", help="Data subsystem report")
+    sub.add_parser("models", help="XGBoost model report")
+    sub.add_parser("momentum", help="Momentum engine report")
+    sub.add_parser("portfolio", help="Portfolio report")
+
+    p_save = sub.add_parser("save", help="Save report to file")
+    p_save.add_argument("file", help="Output file path")
+
+    args = parser.parse_args()
+
+    cmds = {
+        "generate": cmd_generate,
+        "data": cmd_data,
+        "models": cmd_models,
+        "momentum": cmd_momentum,
+        "portfolio": cmd_portfolio,
+        "save": cmd_save,
+    }
+    cmds[args.command](args)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,20 @@
+[Unit]
+Description=Cappuccino Binance Futures Data Collector
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=mrc
+WorkingDirectory=/home/mrc/cappuccino/data_pipeline
+ExecStart=/opt/miniconda3/bin/python3 collector.py
+Restart=on-failure
+RestartSec=15
+StartLimitIntervalSec=120
+StartLimitBurst=5
+StandardOutput=journal
+StandardError=journal
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

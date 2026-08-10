@@ -1,0 +1,310 @@
+{
+  "timestamp": "2026-03-25T00:01:17.038804+00:00",
+  "verdict": "PARTIAL",
+  "combined_oos_auc": 0.5236133333333334,
+  "combined_oos_accuracy": 0.5127466666666666,
+  "per_asset": {
+    "BTC": [
+      {
+        "fold": 1,
+        "test_period": "2024-10 \u2192 2025-02",
+        "auc": 0.5406,
+        "accuracy": 0.5242,
+        "precision": 0.5408,
+        "recall": 0.5207,
+        "n_train": 4498,
+        "n_test": 1774,
+        "best_iter": 26
+      },
+      {
+        "fold": 2,
+        "test_period": "2025-06 \u2192 2025-10",
+        "auc": 0.5377,
+        "accuracy": 0.5341,
+        "precision": 0.5431,
+        "recall": 0.6022,
+        "n_train": 7952,
+        "n_test": 1728,
+        "best_iter": 38
+      },
+      {
+        "fold": 3,
+        "test_period": "2025-12 \u2192 2026-04",
+        "auc": 0.5253,
+        "accuracy": 0.5057,
+        "precision": 0.5034,
+        "recall": 0.9271,
+        "n_train": 10544,
+        "n_test": 1754,
+        "best_iter": 4
+      }
+    ],
+    "ETH": [
+      {
+        "fold": 1,
+        "test_period": "2024-10 \u2192 2025-02",
+        "auc": 0.5067,
+        "accuracy": 0.5096,
+        "precision": 0.5096,
+        "recall": 0.7441,
+        "n_train": 4498,
+        "n_test": 1774,
+        "best_iter": 11
+      },
+      {
+        "fold": 2,
+        "test_period": "2025-06 \u2192 2025-10",
+        "auc": 0.5241,
+        "accuracy": 0.5168,
+        "precision": 0.5213,
+        "recall": 0.8076,
+        "n_train": 7952,
+        "n_test": 1728,
+        "best_iter": 5
+      },
+      {
+        "fold": 3,
+        "test_period": "2025-12 \u2192 2026-04",
+        "auc": 0.5328,
+        "accuracy": 0.5011,
+        "precision": 0.4947,
+        "recall": 0.7642,
+        "n_train": 10544,
+        "n_test": 1754,
+        "best_iter": 24
+      }
+    ],
+    "DOGE": [
+      {
+        "fold": 1,
+        "test_period": "2024-10 \u2192 2025-02",
+        "auc": 0.5315,
+        "accuracy": 0.5045,
+        "precision": 0.5536,
+        "recall": 0.2408,
+        "n_train": 4498,
+        "n_test": 1774,
+        "best_iter": 97
+      },
+      {
+        "fold": 2,
+        "test_period": "2025-06 \u2192 2025-10",
+        "auc": 0.5402,
+        "accuracy": 0.5231,
+        "precision": 0.5206,
+        "recall": 0.9382,
+        "n_train": 7952,
+        "n_test": 1728,
+        "best_iter": 3
+      },
+      {
+        "fold": 3,
+        "test_period": "2025-12 \u2192 2026-04",
+        "auc": 0.4882,
+        "accuracy": 0.4749,
+        "precision": 0.473,
+        "recall": 0.9018,
+        "n_train": 10544,
+        "n_test": 1754,
+        "best_iter": 4
+      }
+    ],
+    "ADA": [
+      {
+        "fold": 1,
+        "test_period": "2024-10 \u2192 2025-02",
+        "auc": 0.5035,
+        "accuracy": 0.5023,
+        "precision": 0.5078,
+        "recall": 0.3993,
+        "n_train": 4498,
+        "n_test": 1774,
+        "best_iter": 3
+      },
+      {
+        "fold": 2,
+        "test_period": "2025-06 \u2192 2025-10",
+        "auc": 0.5385,
+        "accuracy": 0.5156,
+        "precision": 0.5378,
+        "recall": 0.2701,
+        "n_train": 7952,
+        "n_test": 1728,
+        "best_iter": 5
+      },
+      {
+        "fold": 3,
+        "test_period": "2025-12 \u2192 2026-04",
+        "auc": 0.5231,
+        "accuracy": 0.5302,
+        "precision": 0.5374,
+        "recall": 0.0946,
+        "n_train": 10544,
+        "n_test": 1754,
+        "best_iter": 2
+      }
+    ],
+    "SOL": [
+      {
+        "fold": 1,
+        "test_period": "2024-10 \u2192 2025-02",
+        "auc": 0.5185,
+        "accuracy": 0.5068,
+        "precision": 0.547,
+        "recall": 0.2115,
+        "n_train": 4498,
+        "n_test": 1774,
+        "best_iter": 37
+      },
+      {
+        "fold": 2,
+        "test_period": "2025-06 \u2192 2025-10",
+        "auc": 0.5228,
+        "accuracy": 0.5098,
+        "precision": 0.5312,
+        "recall": 0.4738,
+        "n_train": 7952,
+        "n_test": 1728,
+        "best_iter": 65
+      },
+      {
+        "fold": 3,
+        "test_period": "2025-12 \u2192 2026-04",
+        "auc": 0.5207,
+        "accuracy": 0.5325,
+        "precision": 0.5284,
+        "recall": 0.6542,
+        "n_train": 10544,
+        "n_test": 1754,
+        "best_iter": 30
+      }
+    ]
+  },
+  "top_20_features_by_mean_gain": [
+    {
+      "feature": "ADA_ret_4h",
+      "mean_gain": 12.497761726379395
+    },
+    {
+      "feature": "DOGE_ret_2h",
+      "mean_gain": 12.392451922098795
+    },
+    {
+      "feature": "ADA_dist_low_168h",
+      "mean_gain": 12.123173713684082
+    },
+    {
+      "feature": "ADA_ret_2h",
+      "mean_gain": 11.939311027526855
+    },
+    {
+      "feature": "ADA_vol_168h",
+      "mean_gain": 11.862300872802734
+    },
+    {
+      "feature": "ADA_hl_range",
+      "mean_gain": 11.698303699493408
+    },
+    {
+      "feature": "ADA_skew_24h",
+      "mean_gain": 11.169302304585775
+    },
+    {
+      "feature": "btc_pdi_minus_ndi",
+      "mean_gain": 11.154469660350255
+    },
+    {
+      "feature": "ADA_ret_168h",
+      "mean_gain": 11.109848976135254
+    },
+    {
+      "feature": "DOGE_ret_1h",
+      "mean_gain": 10.902038097381592
+    },
+    {
+      "feature": "BTC_vol_ratio_168h",
+      "mean_gain": 10.8192458152771
+    },
+    {
+      "feature": "ETH_rsi_14",
+      "mean_gain": 10.793366432189941
+    },
+    {
+      "feature": "BTC_ichi_price_kijun",
+      "mean_gain": 10.72174866994222
+    },
+    {
+      "feature": "ADA_ichi_price_vs_cloud",
+      "mean_gain": 10.709129810333252
+    },
+    {
+      "feature": "ADA_ret_1h",
+      "mean_gain": 10.548035621643066
+    },
+    {
+      "feature": "ETH_ichi_price_vs_cloud",
+      "mean_gain": 10.42019271850586
+    },
+    {
+      "feature": "BTC_dist_low_24h",
+      "mean_gain": 10.397791226704916
+    },
+    {
+      "feature": "ADA_macd",
+      "mean_gain": 10.222541809082031
+    },
+    {
+      "feature": "ETH_vwap_dev_24h",
+      "mean_gain": 10.176267623901367
+    },
+    {
+      "feature": "DOGE_ret_8h",
+      "mean_gain": 10.163879235585531
+    }
+  ],
+  "config": {
+    "assets": [
+      "BTC",
+      "ETH",
+      "DOGE",
+      "ADA",
+      "SOL"
+    ],
+    "target": "next_bar_direction",
+    "lookback_bars": 168,
+    "auc_threshold": 0.52,
+    "accuracy_threshold": 0.52,
+    "model_dir": "results/models/",
+    "feature_parquet_dir": "~/cappuccino/data_pipeline/exports/",
+    "ohlcv_dir": "~/cappuccino/data/",
+    "folds": [
+      {
+        "train_end": 10,
+        "test_start": 10,
+        "test_end": 14
+      },
+      {
+        "train_end": 18,
+        "test_start": 18,
+        "test_end": 22
+      },
+      {
+        "train_end": 24,
+        "test_start": 24,
+        "test_end": 28
+      }
+    ],
+    "xgb": {
+      "n_estimators": 500,
+      "max_depth": 4,
+      "learning_rate": 0.05,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "min_child_weight": 5,
+      "early_stopping_rounds": 50,
+      "eval_metric": "auc",
+      "use_label_encoder": false,
+      "random_state": 42
+    }
+  }
+}

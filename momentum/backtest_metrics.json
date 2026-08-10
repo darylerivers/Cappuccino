@@ -1,0 +1,70 @@
+{
+  "fold_metrics": [
+    {
+      "label": "Fold 1",
+      "bars": 3931,
+      "years": 0.45,
+      "sharpe": 0.012,
+      "sortino": 0.01,
+      "cagr_pct": -4.77,
+      "max_dd_pct": -19.9,
+      "total_ret_pct": -2.17
+    },
+    {
+      "label": "Fold 2",
+      "bars": 3931,
+      "years": 0.45,
+      "sharpe": 1.571,
+      "sortino": 1.669,
+      "cagr_pct": 52.47,
+      "max_dd_pct": -28.28,
+      "total_ret_pct": 20.84
+    },
+    {
+      "label": "Fold 3",
+      "bars": 3931,
+      "years": 0.45,
+      "sharpe": 0.848,
+      "sortino": 0.773,
+      "cagr_pct": 19.47,
+      "max_dd_pct": -20.3,
+      "total_ret_pct": 8.31
+    }
+  ],
+  "combined_oos": {
+    "label": "Combined OOS",
+    "bars": 11793,
+    "years": 1.35,
+    "sharpe": 0.778,
+    "sortino": 0.704,
+    "cagr_pct": 20.15,
+    "max_dd_pct": -28.28,
+    "total_ret_pct": 28.04
+  },
+  "full_sample": {
+    "label": "Full sample",
+    "bars": 12131,
+    "years": 1.38,
+    "sharpe": 0.823,
+    "sortino": 0.702,
+    "cagr_pct": 20.85,
+    "max_dd_pct": -22.57,
+    "total_ret_pct": 29.98,
+    "pct_time_invested": 51.7,
+    "turnover_per_day": 0.1902,
+    "fee_drag_pct_yr": 8.33,
+    "avg_holding_hrs": 65.6,
+    "pct_time_in_regime": 51.2
+  },
+  "no_regime": {
+    "label": "No regime filter",
+    "bars": 12131,
+    "years": 1.38,
+    "sharpe": 0.827,
+    "sortino": 1.007,
+    "cagr_pct": 28.66,
+    "max_dd_pct": -43.31,
+    "total_ret_pct": 41.76
+  },
+  "passed": "True"
+}
